@@ -791,7 +791,8 @@ export default function App() {
     if (h === "o") void drums.playSample("openhat", 0, 0.6);
   };
 
-  const playSingleChordBar = () => {
+  const playSingleChordBar = async () => {
+    await drums.ensure();
     const accents = pattern.accents ?? [];
     const accMap = Array(8).fill(false).map((_,i)=>accents.includes(i));
     const steps = pattern.steps;
@@ -840,7 +841,8 @@ export default function App() {
   };
 
   // ========== SEQUÊNCIA ==========
-  const playSequenceBar = (barIdx: number) => {
+  const playSequenceBar = async (barIdx: number) => {
+    await drums.ensure();
     const item = sequence[barIdx];
     const voicing = CHORDS[item.key].variants[Math.min(item.varIdx, CHORDS[item.key].variants.length-1)];
     const accents = pattern.accents ?? [];
