@@ -945,7 +945,7 @@ export default function App() {
   const [bassVolume, setBassVolume] = useState(0.6);
   const [bpm] = useState(92);
   const [swing] = useState(0.08);
-  const [strumMs] = useState(12);
+  const [strumMs, setStrumMs] = useState(12);
   const [sustain] = useState(0.24);
 
   /* ===== Seleção rápida ===== */
@@ -1427,6 +1427,28 @@ export default function App() {
               className="w-full h-2"
               style={{accentColor:'#f59e0b'}}
             />
+          </div>
+          <div className="p-5 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
+            <label className="block text-sm font-semibold mb-3 flex items-center gap-2">
+              ⚡ Velocidade Strum
+            </label>
+            <div className="mb-3 text-center">
+              <span className="text-2xl font-bold" style={{color:'#8b5cf6'}}>{strumMs}ms</span>
+            </div>
+            <input
+              type="range"
+              min="5"
+              max="50"
+              step="1"
+              value={strumMs}
+              onChange={e=>setStrumMs(parseFloat(e.target.value))}
+              className="w-full h-2"
+              style={{accentColor:'#8b5cf6'}}
+            />
+            <div className="flex justify-between text-xs text-slate-500 mt-2">
+              <span>Rápido</span>
+              <span>Lento</span>
+            </div>
           </div>
           <div className="p-5 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
             <label className="block text-sm font-semibold mb-3 flex items-center gap-2">
