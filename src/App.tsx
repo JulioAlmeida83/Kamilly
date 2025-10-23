@@ -275,18 +275,9 @@ const INSTRUMENTS: InstrumentName[] = [
   "electric_guitar_muted",
 ];
 
-/** ===== Drum Sampler ===== */
-const DRUM_SAMPLES = {
-  kick: "https://cdn.freesound.org/previews/131/131294_2398403-lq.mp3",
-  snare: "https://cdn.freesound.org/previews/387/387186_7255534-lq.mp3",
-  hihat: "https://cdn.freesound.org/previews/634/634277_2394245-lq.mp3",
-  openhat: "https://cdn.freesound.org/previews/536/536634_9961300-lq.mp3"
-};
-
+/** ===== Drum Sampler (Synthetic) ===== */
 function useDrumSampler() {
   const ctxRef = useRef<AudioContext | null>(null);
-  const buffersRef = useRef<Record<string, AudioBuffer>>({});
-  const loadingRef = useRef(false);
 
   const ensure = async () => {
     if (!ctxRef.current) {
@@ -294,44 +285,78 @@ function useDrumSampler() {
       ctxRef.current = new AudioCtx({ latencyHint: "interactive" });
     }
     if (ctxRef.current.state !== "running") await ctxRef.current.resume();
-
-    if (Object.keys(buffersRef.current).length === 0 && !loadingRef.current) {
-      loadingRef.current = true;
-      const ctx = ctxRef.current;
-      try {
-        const loads = Object.entries(DRUM_SAMPLES).map(async ([key, url]) => {
-          const response = await fetch(url);
-          const arrayBuffer = await response.arrayBuffer();
-          const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
-          return [key, audioBuffer] as const;
-        });
-        const results = await Promise.all(loads);
-        results.forEach(([key, buffer]) => {
-          buffersRef.current[key] = buffer;
-        });
-      } catch (e) {
-        console.warn("Drum samples load error:", e);
-      }
-      loadingRef.current = false;
-    }
   };
 
   const playSample = async (sampleName: string, when = 0, gain = 0.8) => {
     await ensure();
-    const buffer = buffersRef.current[sampleName];
-    if (!buffer || !ctxRef.current) return;
+    if (!ctxRef.current) return;
 
     const ctx = ctxRef.current;
-    const source = ctx.createBufferSource();
-    const gainNode = ctx.createGain();
+    const now = ctx.currentTime + Math.max(0, when);
 
-    source.buffer = buffer;
-    gainNode.gain.value = gain;
-    source.connect(gainNode);
-    gainNode.connect(ctx.destination);
-
-    const now = ctx.currentTime;
-    source.start(now + Math.max(0, when));
+    if (sampleName === "kick") {
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      osc.frequency.setValueAtTime(150, now);
+      osc.frequency.exponentialRampToValueAtTime(0.01, now + 0.5);
+      gainNode.gain.setValueAtTime(gain, now);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+      osc.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.5);
+    } else if (sampleName === "snare") {
+      const noise = ctx.createBufferSource();
+      const buffer = ctx.createBuffer(1, ctx.sampleRate * 0.2, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+      noise.buffer = buffer;
+      const gainNode = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+      filter.type = "highpass";
+      filter.frequency.value = 1000;
+      gainNode.gain.setValueAtTime(gain * 0.7, now);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+      noise.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      noise.start(now);
+      noise.stop(now + 0.2);
+    } else if (sampleName === "hihat") {
+      const noise = ctx.createBufferSource();
+      const buffer = ctx.createBuffer(1, ctx.sampleRate * 0.05, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+      noise.buffer = buffer;
+      const gainNode = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+      filter.type = "highpass";
+      filter.frequency.value = 7000;
+      gainNode.gain.setValueAtTime(gain * 0.4, now);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+      noise.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      noise.start(now);
+      noise.stop(now + 0.05);
+    } else if (sampleName === "openhat") {
+      const noise = ctx.createBufferSource();
+      const buffer = ctx.createBuffer(1, ctx.sampleRate * 0.3, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+      noise.buffer = buffer;
+      const gainNode = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+      filter.type = "highpass";
+      filter.frequency.value = 7000;
+      gainNode.gain.setValueAtTime(gain * 0.4, now);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+      noise.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      noise.start(now);
+      noise.stop(now + 0.3);
+    }
   };
 
   return { playSample, ensure, ctxRef };
