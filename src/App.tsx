@@ -516,7 +516,7 @@ function useDrumSampler() {
 
 /** ===== SoundFont Player ===== */
 type SFInstrument = Awaited<ReturnType<typeof Soundfont.instrument>>;
-function useSF(instrumentName: InstrumentName, reverbMix: number) {
+function useSF(instrumentName: InstrumentName, reverbMix: number, instrumentVolume: number) {
   const ctxRef = useRef<AudioContext | null>(null);
   const instRef = useRef<SFInstrument | null>(null);
   const loadingRef = useRef(false);
@@ -595,7 +595,7 @@ function useSF(instrumentName: InstrumentName, reverbMix: number) {
     await ensure();
     if (!ctxRef.current || !instRef.current) return;
     const now = ctxRef.current.currentTime;
-    instRef.current.play(midi.toString(), now + Math.max(0, when), { gain: vel, duration: dur });
+    instRef.current.play(midi.toString(), now + Math.max(0, when), { gain: vel * instrumentVolume, duration: dur });
   };
 
   // Afinador por tom de referência (seno contínuo)
@@ -927,7 +927,8 @@ export default function App() {
   /* ===== Header / Layout responsivo ===== */
   const [instrument, setInstrument] = useState<InstrumentName>("acoustic_guitar_nylon");
   const [reverbMix, setReverbMix] = useState(0.3);
-  const { playMidi, ensure, startSine, stopSine, ctxRef, updateReverbMix } = useSF(instrument, reverbMix);
+  const [instrumentVolume, setInstrumentVolume] = useState(1.5);
+  const { playMidi, ensure, startSine, stopSine, ctxRef, updateReverbMix } = useSF(instrument, reverbMix, instrumentVolume);
   const drums = useDrumSampler();
 
   useEffect(() => {
@@ -1407,6 +1408,24 @@ export default function App() {
               onChange={e=>setDrumVolume(parseFloat(e.target.value))}
               className="w-full h-2"
               style={{accentColor:'#10b981'}}
+            />
+          </div>
+          <div className="p-5 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
+            <label className="block text-sm font-semibold mb-3 flex items-center gap-2">
+              🎸 Volume Instrumento
+            </label>
+            <div className="mb-3 text-center">
+              <span className="text-2xl font-bold" style={{color:'#f59e0b'}}>{Math.round(instrumentVolume * 100)}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="2"
+              step="0.1"
+              value={instrumentVolume}
+              onChange={e=>setInstrumentVolume(parseFloat(e.target.value))}
+              className="w-full h-2"
+              style={{accentColor:'#f59e0b'}}
             />
           </div>
           <div className="p-5 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
