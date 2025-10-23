@@ -223,14 +223,14 @@ const CHORD_KEYS = Object.keys(CHORDS);
 
 /** ===== Instrumentos ===== */
 const INSTRUMENTS: InstrumentName[] = [
-  "acoustic_guitar_steel",
   "acoustic_guitar_nylon",
+  "acoustic_guitar_steel",
   "electric_guitar_clean",
   "electric_guitar_jazz",
-  "electric_guitar_muted",
+  "acoustic_grand_piano",
   "overdriven_guitar",
   "distortion_guitar",
-  "acoustic_grand_piano",
+  "electric_guitar_muted",
 ];
 
 /** ===== SoundFont Player ===== */
@@ -247,12 +247,15 @@ function useSF(instrumentName: InstrumentName) {
     if (ctxRef.current.state !== "running") await ctxRef.current.resume();
     if (!instRef.current && !loadingRef.current) {
       loadingRef.current = true;
-      instRef.current = await Soundfont.instrument(ctxRef.current, instrumentName, { gain: 0.92 });
+      instRef.current = await Soundfont.instrument(ctxRef.current, instrumentName, {
+        gain: 1.2,
+        soundfont: 'MusyngKite'
+      });
       loadingRef.current = false;
     }
   };
 
-  const playMidi = async (midi: number, when = 0, dur = 0.25, vel = 0.85) => {
+  const playMidi = async (midi: number, when = 0, dur = 0.25, vel = 0.9) => {
     await ensure();
     const now = ctxRef.current!.currentTime;
     instRef.current!.play(midi.toString(), now + Math.max(0, when), { gain: vel, duration: dur });
@@ -872,7 +875,7 @@ export default function App() {
               <div className="flex gap-3">
                 <div className="flex-1">
                   <label className="block text-xs font-medium mb-1">Acorde</label>
-                  <select className="w-full rounded-xl border p-2" value={chordKey} onChange={(e)=>{setChordKey(e.target.value); setVariantIdx(0);}}>
+                  <select className="w-full rounded-xl border p-3 text-base" value={chordKey} onChange={(e)=>{setChordKey(e.target.value); setVariantIdx(0);}}>
                     {CHORD_KEYS.map(k => <option key={k} value={k}>{CHORDS[k].name}</option>)}
                   </select>
                 </div>
@@ -933,13 +936,13 @@ export default function App() {
           <div className="grid sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium mb-1">Tonalidade</label>
-              <select className="w-full rounded-xl border p-2" value={key} onChange={(e)=>handleKeyChange(e.target.value)}>
+              <select className="w-full rounded-xl border p-3 text-base" value={key} onChange={(e)=>handleKeyChange(e.target.value)}>
                 {["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"].map(k => <option key={k} value={k}>{k}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-xs font-medium mb-1">Progressão (preset)</label>
-              <select className="w-full rounded-xl border p-2" value={progression} onChange={(e)=>handleProgressionChange(e.target.value)}>
+              <select className="w-full rounded-xl border p-3 text-base" value={progression} onChange={(e)=>handleProgressionChange(e.target.value)}>
                 {Object.entries(PROGRESSIONS).map(([k, v]) => <option key={k} value={k}>{v.name}</option>)}
               </select>
             </div>
