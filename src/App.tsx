@@ -39,6 +39,9 @@ const midiToHz = (m: number) => 440 * Math.pow(2, (m - 69) / 12);
 const hzToMidi = (hz: number) => 69 + 12 * Math.log2(hz / 440);
 
 /** ===== Ritmos ===== */
+type DrumHit = "k" | "s" | "h" | "o" | "-";
+type DrumPattern = { kick: DrumHit[]; snare: DrumHit[]; hihat: DrumHit[]; label: string };
+
 const PATTERNS: Pattern[] = [
   { id: "down8", label: "D D D D D D D D", steps: ["D","D","D","D","D","D","D","D"], accents: [0,4] },
   { id: "folk1", label: "D - D U - U D U (Folk)", steps: ["D","-","D","U","-","U","D","U"], accents: [0,2,6] },
@@ -47,6 +50,45 @@ const PATTERNS: Pattern[] = [
   { id: "reggae",label: "- U - U - U - U (Reggae)",steps: ["-","U","-","U","-","U","-","U"], accents: [1,3,5,7] },
   { id: "bossa", label: "D - D U - U - U (Bossa)", steps: ["D","-","D","U","-","U","-","U"], accents: [0,2,5] },
 ];
+
+const DRUM_PATTERNS: Record<string, DrumPattern> = {
+  rock: {
+    label: "Rock Básico",
+    kick:  ["k","-","-","-","k","-","-","-","k","-","-","-","k","-","-","-"],
+    snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
+    hihat: ["h","-","h","-","h","-","h","-","h","-","h","-","h","-","h","-"]
+  },
+  pop: {
+    label: "Pop",
+    kick:  ["k","-","-","-","k","-","k","-","k","-","-","-","k","-","-","-"],
+    snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
+    hihat: ["h","-","h","-","h","-","h","-","h","-","h","-","h","-","h","-"]
+  },
+  funk: {
+    label: "Funk",
+    kick:  ["k","-","k","-","-","-","k","-","k","-","-","-","k","-","-","-"],
+    snare: ["-","-","-","-","s","-","-","s","-","-","-","-","s","-","-","-"],
+    hihat: ["h","h","h","h","o","h","h","h","h","h","h","h","o","h","h","h"]
+  },
+  disco: {
+    label: "Disco",
+    kick:  ["k","-","-","-","k","-","-","-","k","-","-","-","k","-","-","-"],
+    snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
+    hihat: ["h","h","h","h","h","h","h","h","h","h","h","h","h","h","h","h"]
+  },
+  reggae: {
+    label: "Reggae",
+    kick:  ["-","-","-","-","k","-","-","-","-","-","-","-","k","-","-","-"],
+    snare: ["-","-","-","-","-","-","-","-","s","-","-","-","-","-","-","-"],
+    hihat: ["-","h","-","h","-","h","-","h","-","h","-","h","-","h","-","h"]
+  },
+  ballad: {
+    label: "Balada",
+    kick:  ["k","-","-","-","-","-","-","-","k","-","-","-","-","-","-","-"],
+    snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
+    hihat: ["h","-","-","h","-","-","h","-","h","-","-","h","-","-","h","-"]
+  }
+};
 
 /** ===== Dicionário de acordes ===== */
 const X = "x" as const;
@@ -232,6 +274,68 @@ const INSTRUMENTS: InstrumentName[] = [
   "distortion_guitar",
   "electric_guitar_muted",
 ];
+
+/** ===== Drum Sampler ===== */
+const DRUM_SAMPLES = {
+  kick: "https://cdn.freesound.org/previews/131/131294_2398403-lq.mp3",
+  snare: "https://cdn.freesound.org/previews/387/387186_7255534-lq.mp3",
+  hihat: "https://cdn.freesound.org/previews/634/634277_2394245-lq.mp3",
+  openhat: "https://cdn.freesound.org/previews/536/536634_9961300-lq.mp3"
+};
+
+function useDrumSampler() {
+  const ctxRef = useRef<AudioContext | null>(null);
+  const buffersRef = useRef<Record<string, AudioBuffer>>({});
+  const loadingRef = useRef(false);
+
+  const ensure = async () => {
+    if (!ctxRef.current) {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      ctxRef.current = new AudioCtx({ latencyHint: "interactive" });
+    }
+    if (ctxRef.current.state !== "running") await ctxRef.current.resume();
+
+    if (Object.keys(buffersRef.current).length === 0 && !loadingRef.current) {
+      loadingRef.current = true;
+      const ctx = ctxRef.current;
+      try {
+        const loads = Object.entries(DRUM_SAMPLES).map(async ([key, url]) => {
+          const response = await fetch(url);
+          const arrayBuffer = await response.arrayBuffer();
+          const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+          return [key, audioBuffer] as const;
+        });
+        const results = await Promise.all(loads);
+        results.forEach(([key, buffer]) => {
+          buffersRef.current[key] = buffer;
+        });
+      } catch (e) {
+        console.warn("Drum samples load error:", e);
+      }
+      loadingRef.current = false;
+    }
+  };
+
+  const playSample = async (sampleName: string, when = 0, gain = 0.8) => {
+    await ensure();
+    const buffer = buffersRef.current[sampleName];
+    if (!buffer || !ctxRef.current) return;
+
+    const ctx = ctxRef.current;
+    const source = ctx.createBufferSource();
+    const gainNode = ctx.createGain();
+
+    source.buffer = buffer;
+    gainNode.gain.value = gain;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    const now = ctx.currentTime;
+    source.start(now + Math.max(0, when));
+  };
+
+  return { playSample, ensure, ctxRef };
+}
 
 /** ===== SoundFont Player ===== */
 type SFInstrument = Awaited<ReturnType<typeof Soundfont.instrument>>;
@@ -591,9 +695,12 @@ export default function App() {
   /* ===== Header / Layout responsivo ===== */
   const [instrument, setInstrument] = useState<InstrumentName>("acoustic_guitar_nylon");
   const { playMidi, ensure, startSine, stopSine, ctxRef } = useSF(instrument);
+  const drums = useDrumSampler();
 
   /* ===== Execução ===== */
   const [patternId, setPatternId] = useState("folk1");
+  const [drumPatternId, setDrumPatternId] = useState("rock");
+  const [drumsEnabled, setDrumsEnabled] = useState(true);
   const [bpm] = useState(92);
   const [swing] = useState(0.08);
   const [strumMs] = useState(12);
@@ -668,6 +775,22 @@ export default function App() {
   };
 
   // ========== ACORDE INDIVIDUAL ==========
+  const playDrumStep = (stepIdx: number) => {
+    if (!drumsEnabled) return;
+    const drumPat = DRUM_PATTERNS[drumPatternId];
+    if (!drumPat) return;
+
+    const idx = stepIdx % 16;
+    const k = drumPat.kick[idx];
+    const s = drumPat.snare[idx];
+    const h = drumPat.hihat[idx];
+
+    if (k === "k") void drums.playSample("kick", 0, 0.9);
+    if (s === "s") void drums.playSample("snare", 0, 0.7);
+    if (h === "h") void drums.playSample("hihat", 0, 0.5);
+    if (h === "o") void drums.playSample("openhat", 0, 0.6);
+  };
+
   const playSingleChordBar = () => {
     const accents = pattern.accents ?? [];
     const accMap = Array(8).fill(false).map((_,i)=>accents.includes(i));
@@ -682,6 +805,9 @@ export default function App() {
       const st = steps[idx];
       if (idx === 0) { void playRootHit(currentVoicing, rootName); }
       if (st !== "-") void playChordStrum(currentVoicing, accMap, st === "D", singleStepIdxRef.current);
+
+      playDrumStep(singleStepIdxRef.current * 2);
+
       singleStepIdxRef.current += 1;
 
       if (singleStepIdxRef.current >= 8) {
@@ -731,6 +857,9 @@ export default function App() {
       const st = steps[idx];
       if (idx === 0) { void playRootHit(voicing, rootName); }
       if (st !== "-") void playChordStrum(voicing, accMap, st === "D", seqStepIdxRef.current);
+
+      playDrumStep(seqStepIdxRef.current * 2);
+
       seqStepIdxRef.current += 1;
 
       if (seqStepIdxRef.current >= 8) {
@@ -849,7 +978,7 @@ export default function App() {
 
       <div className="max-w-7xl mx-auto px-4 py-4 grid gap-6">
         {/* Configurações globais */}
-        <section className="grid sm:grid-cols-2 gap-4">
+        <section className="grid sm:grid-cols-3 gap-4">
           <div className="p-4 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
             <label className="block text-sm font-medium mb-2">Instrumento</label>
             <select className="w-full rounded-xl border p-2" value={instrument} onChange={(e)=>setInstrument(e.target.value as InstrumentName)}>
@@ -857,10 +986,20 @@ export default function App() {
             </select>
           </div>
           <div className="p-4 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
-            <label className="block text-sm font-medium mb-2">Ritmo</label>
+            <label className="block text-sm font-medium mb-2">Ritmo Violão</label>
             <select className="w-full rounded-xl border p-2" value={patternId} onChange={(e)=>setPatternId(e.target.value)}>
               {PATTERNS.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
             </select>
+          </div>
+          <div className="p-4 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
+            <label className="block text-sm font-medium mb-2">🥁 Bateria</label>
+            <select className="w-full rounded-xl border p-2" value={drumPatternId} onChange={(e)=>setDrumPatternId(e.target.value)}>
+              {Object.entries(DRUM_PATTERNS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+            </select>
+            <label className="flex items-center gap-2 text-xs mt-2">
+              <input type="checkbox" checked={drumsEnabled} onChange={e=>setDrumsEnabled(e.target.checked)} />
+              Ativar bateria
+            </label>
           </div>
         </section>
 
