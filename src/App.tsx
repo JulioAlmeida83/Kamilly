@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Soundfont from "soundfont-player";
 
 /**
- * Kamilly Play — Acordes + Ritmos + Fretboard (dedos/pestana) + Sequência (dinâmica) + Afinadores
+ * Toque Comigo — Acordes + Ritmos + Fretboard (dedos/pestana) + Sequência (dinâmica) + Afinadores
  * - Sequenciador linear com comprimento dinâmico, destaque do compasso atual e opção de loop
  * - Fretboard com números dos dedos e pestana (sem capotraste)
  * - Afinador de referência + afinador cromático (microfone)
@@ -1345,18 +1345,22 @@ export default function App() {
 
   /* ===== UI ===== */
   return (
-    <div className="min-h-screen w-full" style={{ background: "linear-gradient(135deg,#f8fafc,#eef2ff)", color: "#0f172a" }}>
+    <div className="min-h-screen w-full" style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)", color: "#f8fafc" }}>
       {/* Header sticky */}
-      <div style={{ position:"sticky", top:0, zIndex:20, backdropFilter:"blur(8px)", background:"linear-gradient(135deg,rgba(255,255,255,.85),rgba(238,242,255,.85))", borderBottom:"1px solid #e5e7eb" }}>
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-baseline gap-3 mb-2">
-            <h1 className="text-xl md:text-2xl font-bold tracking-tight">Kamilly Play</h1>
-            <span className="text-xs md:text-sm text-slate-600">Acordes · Ritmos · Sequência · Afinadores</span>
+      <div style={{ position:"sticky", top:0, zIndex:20, backdropFilter:"blur(12px)", background:"linear-gradient(135deg,rgba(15,23,42,.95),rgba(30,41,59,.95))", borderBottom:"2px solid #3b82f6", boxShadow: "0 4px 20px rgba(59, 130, 246, 0.3)" }}>
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center gap-4 mb-3">
+            <div className="flex items-center gap-3">
+              <div style={{ background: "linear-gradient(135deg, #3b82f6, #8b5cf6)", width: "48px", height: "48px", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px", boxShadow: "0 4px 12px rgba(59, 130, 246, 0.4)" }}>🎸</div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ background: "linear-gradient(135deg, #60a5fa, #a78bfa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Toque Comigo</h1>
+                <p className="text-xs md:text-sm" style={{ color: "#94a3b8" }}>Acordes · Ritmos · Sequências · Afinadores</p>
+              </div>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2 items-center text-xs text-slate-600">
-            <span className="font-medium">Ritmo: {pattern.label}</span>
-            <span>·</span>
-            <span>Instrumento: {instrument.replaceAll('_', ' ')}</span>
+          <div className="flex flex-wrap gap-3 items-center text-xs" style={{ color: "#cbd5e1" }}>
+            <span className="px-3 py-1 rounded-full" style={{ background: "rgba(59, 130, 246, 0.2)", border: "1px solid #3b82f6" }}>📊 Ritmo: {pattern.label}</span>
+            <span className="px-3 py-1 rounded-full" style={{ background: "rgba(139, 92, 246, 0.2)", border: "1px solid #8b5cf6" }}>🎹 {instrument.replaceAll('_', ' ')}</span>
           </div>
         </div>
       </div>
@@ -1364,11 +1368,11 @@ export default function App() {
       <div className="max-w-7xl mx-auto px-4 py-4 grid gap-6">
         {/* Configurações globais */}
         <section className="grid lg:grid-cols-5 md:grid-cols-2 gap-4">
-          <div className="p-5 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
-            <label className="block text-sm font-semibold mb-3 flex items-center gap-2">
+          <div className="p-5 rounded-2xl" style={{background:'rgba(30, 41, 59, 0.8)', boxShadow:'0 4px 20px rgba(0,0,0,.3)', border: '1px solid rgba(59, 130, 246, 0.3)'}}>
+            <label className="block text-sm font-semibold mb-3 flex items-center gap-2" style={{color:'#f1f5f9'}}>
               🎸 Instrumento
             </label>
-            <select className="w-full rounded-xl border-2 p-3 font-medium" style={{borderColor:'#e2e8f0'}} value={instrument} onChange={(e)=>setInstrument(e.target.value as InstrumentName)}>
+            <select className="w-full rounded-xl border-2 p-3 font-medium" style={{borderColor:'#3b82f6', background:'rgba(15, 23, 42, 0.6)', color:'#f8fafc'}} value={instrument} onChange={(e)=>setInstrument(e.target.value as InstrumentName)}>
               <option value="acoustic_guitar_nylon">Violão Nylon</option>
               <option value="acoustic_guitar_steel">Violão Aço</option>
               <option value="electric_guitar_clean">Guitarra Clean</option>
@@ -1379,26 +1383,26 @@ export default function App() {
               <option value="acoustic_grand_piano">Piano</option>
             </select>
           </div>
-          <div className="p-5 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
-            <label className="block text-sm font-semibold mb-3 flex items-center gap-2">
+          <div className="p-5 rounded-2xl" style={{background:'rgba(30, 41, 59, 0.8)', boxShadow:'0 4px 20px rgba(0,0,0,.3)', border: '1px solid rgba(59, 130, 246, 0.3)'}}>
+            <label className="block text-sm font-semibold mb-3 flex items-center gap-2" style={{color:'#f1f5f9'}}>
               🎶 Ritmo Violão
             </label>
-            <select className="w-full rounded-xl border-2 p-3 font-medium" style={{borderColor:'#e2e8f0'}} value={patternId} onChange={(e)=>setPatternId(e.target.value)}>
+            <select className="w-full rounded-xl border-2 p-3 font-medium" style={{borderColor:'#3b82f6', background:'rgba(15, 23, 42, 0.6)', color:'#f8fafc'}} value={patternId} onChange={(e)=>setPatternId(e.target.value)}>
               {PATTERNS.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
             </select>
           </div>
-          <div className="p-5 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
-            <label className="block text-sm font-semibold mb-3 flex items-center gap-2">
+          <div className="p-5 rounded-2xl" style={{background:'rgba(30, 41, 59, 0.8)', boxShadow:'0 4px 20px rgba(0,0,0,.3)', border: '1px solid rgba(59, 130, 246, 0.3)'}}>
+            <label className="block text-sm font-semibold mb-3 flex items-center gap-2" style={{color:'#f1f5f9'}}>
               🥁 Bateria
             </label>
-            <select className="w-full rounded-xl border-2 p-3 mb-3 font-medium" style={{borderColor:'#e2e8f0'}} value={drumPatternId} onChange={(e)=>setDrumPatternId(e.target.value)}>
+            <select className="w-full rounded-xl border-2 p-3 mb-3 font-medium" style={{borderColor:'#3b82f6', background:'rgba(15, 23, 42, 0.6)', color:'#f8fafc'}} value={drumPatternId} onChange={(e)=>setDrumPatternId(e.target.value)}>
               {Object.entries(DRUM_PATTERNS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
             </select>
             <label className="flex items-center gap-2 text-sm mb-3 font-medium">
               <input type="checkbox" className="w-4 h-4" checked={drumsEnabled} onChange={e=>setDrumsEnabled(e.target.checked)} />
               Ativar bateria
             </label>
-            <label className="block text-sm font-medium mb-2">Volume: {Math.round(drumVolume * 100)}%</label>
+            <label className="block text-sm font-medium mb-2" style={{color:'#cbd5e1'}}>Volume: {Math.round(drumVolume * 100)}%</label>
             <input
               type="range"
               min="0"
@@ -1410,8 +1414,8 @@ export default function App() {
               style={{accentColor:'#10b981'}}
             />
           </div>
-          <div className="p-5 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
-            <label className="block text-sm font-semibold mb-3 flex items-center gap-2">
+          <div className="p-5 rounded-2xl" style={{background:'rgba(30, 41, 59, 0.8)', boxShadow:'0 4px 20px rgba(0,0,0,.3)', border: '1px solid rgba(59, 130, 246, 0.3)'}}>
+            <label className="block text-sm font-semibold mb-3 flex items-center gap-2" style={{color:'#f1f5f9'}}>
               🎸 Volume Instrumento
             </label>
             <div className="mb-3 text-center">
@@ -1428,8 +1432,8 @@ export default function App() {
               style={{accentColor:'#f59e0b'}}
             />
           </div>
-          <div className="p-5 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
-            <label className="block text-sm font-semibold mb-3 flex items-center gap-2">
+          <div className="p-5 rounded-2xl" style={{background:'rgba(30, 41, 59, 0.8)', boxShadow:'0 4px 20px rgba(0,0,0,.3)', border: '1px solid rgba(59, 130, 246, 0.3)'}}>
+            <label className="block text-sm font-semibold mb-3 flex items-center gap-2" style={{color:'#f1f5f9'}}>
               ⚡ Velocidade Strum
             </label>
             <div className="mb-3 text-center">
@@ -1445,13 +1449,13 @@ export default function App() {
               className="w-full h-2"
               style={{accentColor:'#8b5cf6'}}
             />
-            <div className="flex justify-between text-xs text-slate-500 mt-2">
+            <div className="flex justify-between text-xs text-slate-400 mt-2">
               <span>Rápido</span>
               <span>Lento</span>
             </div>
           </div>
-          <div className="p-5 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
-            <label className="block text-sm font-semibold mb-3 flex items-center gap-2">
+          <div className="p-5 rounded-2xl" style={{background:'rgba(30, 41, 59, 0.8)', boxShadow:'0 4px 20px rgba(0,0,0,.3)', border: '1px solid rgba(59, 130, 246, 0.3)'}}>
+            <label className="block text-sm font-semibold mb-3 flex items-center gap-2" style={{color:'#f1f5f9'}}>
               🎛️ Reverb
             </label>
             <div className="mb-3 text-center">
@@ -1467,16 +1471,16 @@ export default function App() {
               className="w-full h-2"
               style={{accentColor:'#0ea5e9'}}
             />
-            <div className="flex justify-between text-xs text-slate-500 mt-2">
+            <div className="flex justify-between text-xs text-slate-400 mt-2">
               <span>Seco</span>
               <span>Ambiente</span>
             </div>
           </div>
-          <div className="p-5 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
-            <label className="block text-sm font-semibold mb-3 flex items-center gap-2">
+          <div className="p-5 rounded-2xl" style={{background:'rgba(30, 41, 59, 0.8)', boxShadow:'0 4px 20px rgba(0,0,0,.3)', border: '1px solid rgba(59, 130, 246, 0.3)'}}>
+            <label className="block text-sm font-semibold mb-3 flex items-center gap-2" style={{color:'#f1f5f9'}}>
               🎸 Baixo
             </label>
-            <select className="w-full rounded-xl border-2 p-3 mb-3 font-medium" style={{borderColor:'#e2e8f0'}} value={bassPattern} onChange={(e)=>setBassPattern(e.target.value)}>
+            <select className="w-full rounded-xl border-2 p-3 mb-3 font-medium" style={{borderColor:'#3b82f6', background:'rgba(15, 23, 42, 0.6)', color:'#f8fafc'}} value={bassPattern} onChange={(e)=>setBassPattern(e.target.value)}>
               <option value="steady">1. Steady (Fundamental)</option>
               <option value="root-fifth">2. Fundamental + Quinta</option>
               <option value="octave">3. Oitavas Alternadas</option>
@@ -1506,7 +1510,7 @@ export default function App() {
               <input type="checkbox" className="w-4 h-4" checked={bassEnabled} onChange={e=>setBassEnabled(e.target.checked)} />
               Ativar baixo
             </label>
-            <label className="block text-sm font-medium mb-2">Volume: {Math.round(bassVolume * 100)}%</label>
+            <label className="block text-sm font-medium mb-2" style={{color:'#cbd5e1'}}>Volume: {Math.round(bassVolume * 100)}%</label>
             <input
               type="range"
               min="0"
@@ -1521,13 +1525,13 @@ export default function App() {
         </section>
 
         {/* ACORDE INDIVIDUAL */}
-        <section className="p-6 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)', border: isPlayingSingle ? '3px solid #10b981' : '2px solid transparent'}}>
+        <section className="p-6 rounded-2xl" style={{background:'rgba(30, 41, 59, 0.8)', boxShadow:'0 4px 20px rgba(0,0,0,.3)', border: isPlayingSingle ? '3px solid #10b981' : '1px solid rgba(59, 130, 246, 0.3)'}}>
           <div className="mb-5">
-            <h2 className="text-xl font-bold flex items-center gap-2">
+            <h2 className="text-xl font-bold flex items-center gap-2" style={{color:'#f8fafc'}}>
               🎸 Acorde Individual
               {isPlayingSingle && <span className="text-xs px-3 py-1 rounded-full font-semibold" style={{background:'#10b981', color:'#fff'}}>TOCANDO</span>}
             </h2>
-            <p className="text-sm text-slate-600 mt-2">Escolha um acorde e toque em loop ou uma vez</p>
+            <p className="text-sm text-slate-300 mt-2">Escolha um acorde e toque em loop ou uma vez</p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-6">
@@ -1535,13 +1539,13 @@ export default function App() {
               <div className="flex gap-3">
                 <div className="flex-1">
                   <label className="block text-sm font-semibold mb-2">Acorde</label>
-                  <select className="w-full rounded-xl border-2 p-3 text-base font-medium" style={{borderColor:'#e2e8f0'}} value={chordKey} onChange={(e)=>{setChordKey(e.target.value); setVariantIdx(0);}}>
+                  <select className="w-full rounded-xl border-2 p-3 text-base font-medium" style={{borderColor:'#3b82f6', background:'rgba(15, 23, 42, 0.6)', color:'#f8fafc'}} value={chordKey} onChange={(e)=>{setChordKey(e.target.value); setVariantIdx(0);}}>
                     {CHORD_KEYS.map(k => <option key={k} value={k}>{CHORDS[k].name}</option>)}
                   </select>
                 </div>
                 <div className="flex-1">
                   <label className="block text-sm font-semibold mb-2">Voicing</label>
-                  <select className="w-full rounded-xl border-2 p-3 font-medium" style={{borderColor:'#e2e8f0'}} value={variantIdx} onChange={(e)=>setVariantIdx(Number(e.target.value))}>
+                  <select className="w-full rounded-xl border-2 p-3 font-medium" style={{borderColor:'#3b82f6', background:'rgba(15, 23, 42, 0.6)', color:'#f8fafc'}} value={variantIdx} onChange={(e)=>setVariantIdx(Number(e.target.value))}>
                     {CHORDS[chordKey].variants.map((v,i)=> <option key={i} value={i}>{v.label.split(' ')[0]}</option>)}
                   </select>
                 </div>
@@ -1584,13 +1588,13 @@ export default function App() {
         </section>
 
         {/* SEQUÊNCIA DE ACORDES */}
-        <section className="space-y-3 p-4 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)', border: isPlayingSequence ? '2px solid #16a34a' : '2px solid transparent'}}>
+        <section className="space-y-3 p-4 rounded-2xl" style={{background:'rgba(30, 41, 59, 0.8)', boxShadow:'0 4px 20px rgba(0,0,0,.3)', border: isPlayingSequence ? '2px solid #16a34a' : '1px solid rgba(59, 130, 246, 0.3)'}}>
           <div className="mb-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
+            <h2 className="text-lg font-semibold flex items-center gap-2" style={{color:'#f8fafc'}}>
               🎼 Sequência de Acordes
               {isPlayingSequence && <span className="text-xs px-2 py-1 rounded-full" style={{background:'#16a34a', color:'#fff'}}>Tocando</span>}
             </h2>
-            <p className="text-xs text-slate-500 mt-1">Escolha uma tonalidade e progressão. Os acordes se ajustam automaticamente. Use alternativas para variar o som.</p>
+            <p className="text-xs text-slate-400 mt-1">Escolha uma tonalidade e progressão. Os acordes se ajustam automaticamente. Use alternativas para variar o som.</p>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-3">
@@ -1666,7 +1670,7 @@ export default function App() {
           <div className="flex justify-end mb-2">
             <button
               className="px-3 py-1.5 rounded-xl text-xs"
-              style={{background:'#e2e8f0'}}
+              style={{background:'rgba(51, 65, 85, 0.5)', border: '1px solid rgba(148, 163, 184, 0.3)'}}
               onClick={()=>setSequence([...sequence, { key: sequence.at(-1)?.key ?? 'C', varIdx: 0, degreeIdx: -1 }])}
             >+ Adicionar compasso</button>
           </div>
@@ -1681,7 +1685,7 @@ export default function App() {
                   <div key={idx} className="rounded-xl border" style={{ minWidth: 240, padding: 10, background: currentBar===idx? '#e0e7ff' : 'rgba(255,255,255,.9)', borderColor: currentBar===idx? '#4f46e5' : '#e5e7eb', boxShadow: currentBar===idx? '0 2px 8px rgba(79,70,229,.25)' : 'none' }}>
                     <div className="text-[11px] text-neutral-600 mb-2 flex items-center justify-between">
                       <span>{idx + 1}º compasso</span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px]" style={{background:'#f1f5f9'}}>
+                      <span className="px-2 py-0.5 rounded-full text-[10px]" style={{background:'rgba(51, 65, 85, 0.6)', border: '1px solid rgba(148, 163, 184, 0.3)'}}>
                         {getChordDisplaySymbol(it.key)}
                       </span>
                     </div>
@@ -1724,7 +1728,7 @@ export default function App() {
                       <select className={`${hasAlternatives ? 'flex-1' : 'w-[110px]'} text-sm`} value={it.varIdx} onChange={(e)=>{ const v = Number(e.target.value); const copy=[...sequence]; copy[idx] = { ...copy[idx], varIdx:v }; setSequence(copy); }}>
                         {CHORDS[(sequence[idx].key in CHORDS ? sequence[idx].key : "C") as keyof typeof CHORDS].variants.map((v,i)=> <option key={i} value={i}>{v.label.split(' ')[0]}</option>)}
                       </select>
-                      <button className="text-xs px-2 py-1 rounded" style={{background:'#fee2e2'}} onClick={()=>{ const copy=[...sequence]; copy.splice(idx,1); setSequence(copy.length?copy:[{key:'C',varIdx:0, degreeIdx: 0}]); }}>−</button>
+                      <button className="text-xs px-2 py-1 rounded" style={{background:'rgba(239, 68, 68, 0.2)', border: '1px solid #ef4444'}} onClick={()=>{ const copy=[...sequence]; copy.splice(idx,1); setSequence(copy.length?copy:[{key:'C',varIdx:0, degreeIdx: 0}]); }}>−</button>
                     </div>
                   </div>
                 );
@@ -1736,7 +1740,7 @@ export default function App() {
         {/* Afinadores */}
         <section className="grid lg:grid-cols-2 gap-6">
           {/* Referência de tom */}
-          <div className="p-4 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
+          <div className="p-4 rounded-2xl" style={{background:'rgba(30, 41, 59, 0.8)', boxShadow:'0 4px 20px rgba(0,0,0,.3)', border: '1px solid rgba(59, 130, 246, 0.3)'}}>
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-sm font-medium mr-2">Afinador (tons de referência)</span>
               {[
@@ -1747,14 +1751,14 @@ export default function App() {
                 {name:'B (B3)', mid:59},
                 {name:'e (E4)', mid:64},
               ].map((s,i)=> (
-                <button key={i} onClick={()=>startSine(midiToHz(s.mid))} className="px-3 py-2 rounded-xl" style={{background:'#f1f5f9'}}>{s.name}</button>
+                <button key={i} onClick={()=>startSine(midiToHz(s.mid))} className="px-3 py-2 rounded-xl" style={{background:'rgba(51, 65, 85, 0.6)', border: '1px solid rgba(148, 163, 184, 0.3)'}}>{s.name}</button>
               ))}
-              <button onClick={stopSine} className="px-3 py-2 rounded-xl" style={{background:'#fee2e2'}}>Parar</button>
+              <button onClick={stopSine} className="px-3 py-2 rounded-xl" style={{background:'rgba(239, 68, 68, 0.2)', border: '1px solid #ef4444'}}>Parar</button>
             </div>
           </div>
 
           {/* Cromático (microfone) */}
-          <div className="p-4 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
+          <div className="p-4 rounded-2xl" style={{background:'rgba(30, 41, 59, 0.8)', boxShadow:'0 4px 20px rgba(0,0,0,.3)', border: '1px solid rgba(59, 130, 246, 0.3)'}}>
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm font-medium">Afinador cromático (microfone)</span>
               {!tuner.running ? (
@@ -1779,12 +1783,12 @@ export default function App() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4 mb-3">
-              <div className="text-center p-3 rounded-xl" style={{background:'#f1f5f9'}}>
-                <div className="text-xs text-slate-500 mb-1">Frequência</div>
+              <div className="text-center p-3 rounded-xl" style={{background:'rgba(51, 65, 85, 0.6)', border: '1px solid rgba(148, 163, 184, 0.3)'}}>
+                <div className="text-xs text-slate-400 mb-1">Frequência</div>
                 <div className="text-xl font-semibold">{tuner.freq? tuner.freq.toFixed(1)+" Hz" : "—"}</div>
               </div>
-              <div className="text-center p-3 rounded-xl" style={{background:'#f1f5f9'}}>
-                <div className="text-xs text-slate-500 mb-1">Cents</div>
+              <div className="text-center p-3 rounded-xl" style={{background:'rgba(51, 65, 85, 0.6)', border: '1px solid rgba(148, 163, 184, 0.3)'}}>
+                <div className="text-xs text-slate-400 mb-1">Cents</div>
                 <div className="text-xl font-semibold" style={{color: Math.abs(tuner.cents) < 5 ? '#10b981' : '#ef4444'}}>{tuner.freq? `${tuner.cents>0?'+':''}${tuner.cents}` : '—'}</div>
               </div>
             </div>
@@ -1806,11 +1810,11 @@ export default function App() {
                 <text x={110} y={108} textAnchor="middle" fontSize={10} fill="#64748b">-50¢                                                0¢                                                +50¢</text>
               </svg>
             </div>
-            <div className="text-xs text-slate-500 text-center">Dica: use fones e um local silencioso para melhor leitura.</div>
+            <div className="text-xs text-slate-400 text-center">Dica: use fones e um local silencioso para melhor leitura.</div>
           </div>
         </section>
 
-        <footer className="text-xs text-slate-500 text-center pb-6">Kamilly Play — feito para funcionar bem em smartphones (layout rolável, botões grandes, header fixo).</footer>
+        <footer className="text-xs text-slate-400 text-center pb-6">Kamilly Play — feito para funcionar bem em smartphones (layout rolável, botões grandes, header fixo).</footer>
       </div>
     </div>
   );
