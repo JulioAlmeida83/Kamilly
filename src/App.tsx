@@ -87,6 +87,30 @@ const DRUM_PATTERNS: Record<string, DrumPattern> = {
     kick:  ["k","-","-","-","-","-","-","-","k","-","-","-","-","-","-","-"],
     snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
     hihat: ["h","-","-","h","-","-","h","-","h","-","-","h","-","-","h","-"]
+  },
+  jazz: {
+    label: "Jazz Swing",
+    kick:  ["k","-","-","k","-","-","k","-","-","k","-","-","k","-","-","-"],
+    snare: ["-","-","s","-","-","s","-","-","s","-","-","s","-","-","s","-"],
+    hihat: ["h","-","h","h","-","h","h","-","h","h","-","h","h","-","h","h"]
+  },
+  blues: {
+    label: "Blues Shuffle",
+    kick:  ["k","-","-","-","-","-","k","-","k","-","-","-","-","-","k","-"],
+    snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
+    hihat: ["h","-","h","h","-","h","h","-","h","h","-","h","h","-","h","h"]
+  },
+  latin: {
+    label: "Latin/Samba",
+    kick:  ["k","-","k","-","k","-","-","-","k","-","k","-","k","-","-","-"],
+    snare: ["-","-","-","s","-","-","s","-","-","-","-","s","-","-","s","-"],
+    hihat: ["h","h","h","h","h","h","h","h","h","h","h","h","h","h","h","h"]
+  },
+  country: {
+    label: "Country",
+    kick:  ["k","-","-","-","k","k","-","-","k","-","-","-","k","-","-","-"],
+    snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
+    hihat: ["h","-","-","h","-","-","h","-","h","-","-","h","-","-","h","-"]
   }
 };
 
@@ -409,7 +433,7 @@ function useSF(instrumentName: InstrumentName) {
     const ctx = ctxRef.current!;
     const osc = ctx.createOscillator();
     const g = ctx.createGain();
-    g.gain.value = 0.2;
+    g.gain.value = 0.5;
     osc.type = "sine";
     osc.frequency.value = hz;
     osc.connect(g); g.connect(ctx.destination);
@@ -736,6 +760,7 @@ export default function App() {
   const [patternId, setPatternId] = useState("folk1");
   const [drumPatternId, setDrumPatternId] = useState("rock");
   const [drumsEnabled, setDrumsEnabled] = useState(true);
+  const [drumVolume, setDrumVolume] = useState(0.7);
   const [bpm] = useState(92);
   const [swing] = useState(0.08);
   const [strumMs] = useState(12);
@@ -820,10 +845,10 @@ export default function App() {
     const s = drumPat.snare[idx];
     const h = drumPat.hihat[idx];
 
-    if (k === "k") void drums.playSample("kick", 0, 0.9);
-    if (s === "s") void drums.playSample("snare", 0, 0.7);
-    if (h === "h") void drums.playSample("hihat", 0, 0.5);
-    if (h === "o") void drums.playSample("openhat", 0, 0.6);
+    if (k === "k") void drums.playSample("kick", 0, 0.9 * drumVolume);
+    if (s === "s") void drums.playSample("snare", 0, 0.7 * drumVolume);
+    if (h === "h") void drums.playSample("hihat", 0, 0.5 * drumVolume);
+    if (h === "o") void drums.playSample("openhat", 0, 0.6 * drumVolume);
   };
 
   const playSingleChordBar = () => {
@@ -1030,79 +1055,96 @@ export default function App() {
 
       <div className="max-w-7xl mx-auto px-4 py-4 grid gap-6">
         {/* Configurações globais */}
-        <section className="grid sm:grid-cols-3 gap-4">
-          <div className="p-4 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
-            <label className="block text-sm font-medium mb-2">Instrumento</label>
-            <select className="w-full rounded-xl border p-2" value={instrument} onChange={(e)=>setInstrument(e.target.value as InstrumentName)}>
+        <section className="grid lg:grid-cols-3 md:grid-cols-2 gap-4">
+          <div className="p-5 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
+            <label className="block text-sm font-semibold mb-3 flex items-center gap-2">
+              🎸 Instrumento
+            </label>
+            <select className="w-full rounded-xl border-2 p-3 font-medium" style={{borderColor:'#e2e8f0'}} value={instrument} onChange={(e)=>setInstrument(e.target.value as InstrumentName)}>
               {INSTRUMENTS.map(n=> <option key={n} value={n}>{n.replaceAll('_',' ')}</option>)}
             </select>
           </div>
-          <div className="p-4 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
-            <label className="block text-sm font-medium mb-2">Ritmo Violão</label>
-            <select className="w-full rounded-xl border p-2" value={patternId} onChange={(e)=>setPatternId(e.target.value)}>
+          <div className="p-5 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
+            <label className="block text-sm font-semibold mb-3 flex items-center gap-2">
+              🎶 Ritmo Violão
+            </label>
+            <select className="w-full rounded-xl border-2 p-3 font-medium" style={{borderColor:'#e2e8f0'}} value={patternId} onChange={(e)=>setPatternId(e.target.value)}>
               {PATTERNS.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
             </select>
           </div>
-          <div className="p-4 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
-            <label className="block text-sm font-medium mb-2">🥁 Bateria</label>
-            <select className="w-full rounded-xl border p-2" value={drumPatternId} onChange={(e)=>setDrumPatternId(e.target.value)}>
+          <div className="p-5 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
+            <label className="block text-sm font-semibold mb-3 flex items-center gap-2">
+              🥁 Bateria
+            </label>
+            <select className="w-full rounded-xl border-2 p-3 mb-3 font-medium" style={{borderColor:'#e2e8f0'}} value={drumPatternId} onChange={(e)=>setDrumPatternId(e.target.value)}>
               {Object.entries(DRUM_PATTERNS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
             </select>
-            <label className="flex items-center gap-2 text-xs mt-2">
-              <input type="checkbox" checked={drumsEnabled} onChange={e=>setDrumsEnabled(e.target.checked)} />
+            <label className="flex items-center gap-2 text-sm mb-3 font-medium">
+              <input type="checkbox" className="w-4 h-4" checked={drumsEnabled} onChange={e=>setDrumsEnabled(e.target.checked)} />
               Ativar bateria
             </label>
+            <label className="block text-sm font-medium mb-2">Volume: {Math.round(drumVolume * 100)}%</label>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={drumVolume}
+              onChange={e=>setDrumVolume(parseFloat(e.target.value))}
+              className="w-full h-2"
+              style={{accentColor:'#10b981'}}
+            />
           </div>
         </section>
 
         {/* ACORDE INDIVIDUAL */}
-        <section className="p-4 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)', border: isPlayingSingle ? '2px solid #4f46e5' : '2px solid transparent'}}>
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
+        <section className="p-6 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)', border: isPlayingSingle ? '3px solid #10b981' : '2px solid transparent'}}>
+          <div className="mb-5">
+            <h2 className="text-xl font-bold flex items-center gap-2">
               🎸 Acorde Individual
-              {isPlayingSingle && <span className="text-xs px-2 py-1 rounded-full" style={{background:'#4f46e5', color:'#fff'}}>Tocando</span>}
+              {isPlayingSingle && <span className="text-xs px-3 py-1 rounded-full font-semibold" style={{background:'#10b981', color:'#fff'}}>TOCANDO</span>}
             </h2>
-            <p className="text-xs text-slate-500 mt-1">Escolha um acorde e toque em loop ou uma vez</p>
+            <p className="text-sm text-slate-600 mt-2">Escolha um acorde e toque em loop ou uma vez</p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-4">
-            <div className="space-y-3">
+          <div className="grid lg:grid-cols-2 gap-6">
+            <div className="space-y-4">
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="block text-xs font-medium mb-1">Acorde</label>
-                  <select className="w-full rounded-xl border p-3 text-base" value={chordKey} onChange={(e)=>{setChordKey(e.target.value); setVariantIdx(0);}}>
+                  <label className="block text-sm font-semibold mb-2">Acorde</label>
+                  <select className="w-full rounded-xl border-2 p-3 text-base font-medium" style={{borderColor:'#e2e8f0'}} value={chordKey} onChange={(e)=>{setChordKey(e.target.value); setVariantIdx(0);}}>
                     {CHORD_KEYS.map(k => <option key={k} value={k}>{CHORDS[k].name}</option>)}
                   </select>
                 </div>
                 <div className="flex-1">
-                  <label className="block text-xs font-medium mb-1">Voicing</label>
-                  <select className="w-full rounded-xl border p-2" value={variantIdx} onChange={(e)=>setVariantIdx(Number(e.target.value))}>
+                  <label className="block text-sm font-semibold mb-2">Voicing</label>
+                  <select className="w-full rounded-xl border-2 p-3 font-medium" style={{borderColor:'#e2e8f0'}} value={variantIdx} onChange={(e)=>setVariantIdx(Number(e.target.value))}>
                     {CHORDS[chordKey].variants.map((v,i)=> <option key={i} value={i}>{v.label.split(' ')[0]}</option>)}
                   </select>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <label className="text-xs flex items-center gap-2">
-                  <input type="checkbox" checked={loopSingle} onChange={e=>setLoopSingle(e.target.checked)} />
+                <label className="text-sm flex items-center gap-2 font-medium">
+                  <input type="checkbox" className="w-4 h-4" checked={loopSingle} onChange={e=>setLoopSingle(e.target.checked)} />
                   Loop (repetir)
                 </label>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <button
                   onClick={handlePlaySingle}
                   disabled={isPlayingSequence}
-                  className="flex-1 px-4 py-3 rounded-xl font-medium disabled:opacity-50"
-                  style={{background:'#4f46e5',color:'#fff', boxShadow:'0 2px 6px rgba(79,70,229,.3)'}}
+                  className="flex-1 px-5 py-4 rounded-xl font-bold text-base disabled:opacity-50"
+                  style={{background:'#10b981',color:'#fff', boxShadow:'0 4px 12px rgba(16,185,129,.4)'}}
                 >
                   {isPlayingSingle ? '🔄 Tocando...' : '▶️ Tocar Acorde'}
                 </button>
                 <button
                   onClick={handleStopSingle}
                   disabled={!isPlayingSingle}
-                  className="px-4 py-3 rounded-xl font-medium disabled:opacity-30"
-                  style={{background:'#dc2626',color:'#fff'}}
+                  className="px-5 py-4 rounded-xl font-bold disabled:opacity-30"
+                  style={{background:'#dc2626',color:'#fff', boxShadow:'0 4px 12px rgba(220,38,38,.4)'}}
                 >
                   ⏹️
                 </button>
@@ -1290,7 +1332,7 @@ export default function App() {
 
           {/* Cromático (microfone) */}
           <div className="p-4 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-4">
               <span className="text-sm font-medium">Afinador cromático (microfone)</span>
               {!tuner.running ? (
                 <button onClick={tuner.start} className="px-3 py-2 rounded-xl" style={{background:'#0ea5e9', color:'#fff'}}>🎤 Iniciar</button>
@@ -1298,18 +1340,29 @@ export default function App() {
                 <button onClick={tuner.stop} className="px-3 py-2 rounded-xl" style={{background:'#dc2626', color:'#fff'}}>Parar</button>
               )}
             </div>
-            <div className="grid grid-cols-3 gap-3 items-center">
-              <div className="text-center">
-                <div className="text-xs text-slate-500">Nota</div>
-                <div className="text-2xl font-bold" style={{letterSpacing:1}}>{tuner.note}</div>
+            <div className="text-center mb-4">
+              <div className="text-sm text-slate-500 mb-2">Nota detectada</div>
+              <div
+                className="text-6xl font-bold inline-block px-6 py-3 rounded-2xl"
+                style={{
+                  letterSpacing: 2,
+                  background: tuner.note !== '—' ? '#10b981' : '#e2e8f0',
+                  color: tuner.note !== '—' ? '#fff' : '#64748b',
+                  boxShadow: tuner.note !== '—' ? '0 4px 20px rgba(16, 185, 129, 0.4)' : 'none',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                {tuner.note}
               </div>
-              <div className="text-center">
-                <div className="text-xs text-slate-500">Freq</div>
-                <div className="text-lg font-semibold">{tuner.freq? tuner.freq.toFixed(1)+" Hz" : "—"}</div>
+            </div>
+            <div className="grid grid-cols-2 gap-4 mb-3">
+              <div className="text-center p-3 rounded-xl" style={{background:'#f1f5f9'}}>
+                <div className="text-xs text-slate-500 mb-1">Frequência</div>
+                <div className="text-xl font-semibold">{tuner.freq? tuner.freq.toFixed(1)+" Hz" : "—"}</div>
               </div>
-              <div className="text-center">
-                <div className="text-xs text-slate-500">Cents</div>
-                <div className="text-lg font-semibold">{tuner.freq? `${tuner.cents>0?'+':''}${tuner.cents}` : '—'}</div>
+              <div className="text-center p-3 rounded-xl" style={{background:'#f1f5f9'}}>
+                <div className="text-xs text-slate-500 mb-1">Cents</div>
+                <div className="text-xl font-semibold" style={{color: Math.abs(tuner.cents) < 5 ? '#10b981' : '#ef4444'}}>{tuner.freq? `${tuner.cents>0?'+':''}${tuner.cents}` : '—'}</div>
               </div>
             </div>
             {/* needle */}
