@@ -388,16 +388,50 @@ function useDrumSampler() {
 
 /** ===== SoundFont Player ===== */
 type SFInstrument = Awaited<ReturnType<typeof Soundfont.instrument>>;
-function useSF(instrumentName: InstrumentName) {
+function useSF(instrumentName: InstrumentName, reverbMix: number) {
   const ctxRef = useRef<AudioContext | null>(null);
   const instRef = useRef<SFInstrument | null>(null);
   const loadingRef = useRef(false);
   const currentInstrumentRef = useRef<InstrumentName | null>(null);
+  const reverbNodeRef = useRef<ConvolverNode | null>(null);
+  const dryGainRef = useRef<GainNode | null>(null);
+  const wetGainRef = useRef<GainNode | null>(null);
+  const masterGainRef = useRef<GainNode | null>(null);
 
   const ensure = async () => {
     if (!ctxRef.current) {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       ctxRef.current = new AudioCtx({ latencyHint: "interactive" });
+
+      const ctx = ctxRef.current;
+      const sampleRate = ctx.sampleRate;
+      const length = sampleRate * 2;
+      const impulse = ctx.createBuffer(2, length, sampleRate);
+      const left = impulse.getChannelData(0);
+      const right = impulse.getChannelData(1);
+
+      for (let i = 0; i < length; i++) {
+        const decay = Math.pow(1 - i / length, 2);
+        left[i] = (Math.random() * 2 - 1) * decay;
+        right[i] = (Math.random() * 2 - 1) * decay;
+      }
+
+      const convolver = ctx.createConvolver();
+      convolver.buffer = impulse;
+      reverbNodeRef.current = convolver;
+
+      dryGainRef.current = ctx.createGain();
+      wetGainRef.current = ctx.createGain();
+      masterGainRef.current = ctx.createGain();
+
+      dryGainRef.current.gain.value = 1 - reverbMix;
+      wetGainRef.current.gain.value = reverbMix;
+      masterGainRef.current.gain.value = 1.2;
+
+      dryGainRef.current.connect(masterGainRef.current);
+      wetGainRef.current.connect(convolver);
+      convolver.connect(masterGainRef.current);
+      masterGainRef.current.connect(ctx.destination);
     }
     if (ctxRef.current.state !== "running") await ctxRef.current.resume();
     if (currentInstrumentRef.current !== instrumentName) {
@@ -408,13 +442,24 @@ function useSF(instrumentName: InstrumentName) {
       loadingRef.current = true;
       try {
         instRef.current = await Soundfont.instrument(ctxRef.current, instrumentName, {
-          gain: 1.2,
-          soundfont: 'MusyngKite'
+          gain: 1.0,
+          soundfont: 'MusyngKite',
+          destination: dryGainRef.current!
         });
+        if (wetGainRef.current) {
+          instRef.current.connect(wetGainRef.current as never);
+        }
       } catch (e) {
         console.error('Failed to load instrument:', e);
       }
       loadingRef.current = false;
+    }
+  };
+
+  const updateReverbMix = (mix: number) => {
+    if (dryGainRef.current && wetGainRef.current) {
+      dryGainRef.current.gain.value = 1 - mix;
+      wetGainRef.current.gain.value = mix;
     }
   };
 
@@ -442,7 +487,7 @@ function useSF(instrumentName: InstrumentName) {
   };
   const stopSine = () => { sineHold.current?.stop(); sineHold.current = null; };
 
-  return { playMidi, ensure, startSine, stopSine, ctxRef };
+  return { playMidi, ensure, startSine, stopSine, ctxRef, updateReverbMix };
 }
 
 /** ===== Fretboard vertical (dedos + pestana) ===== */
@@ -753,8 +798,13 @@ function mapSymbolToDictKey(sym: string): string {
 export default function App() {
   /* ===== Header / Layout responsivo ===== */
   const [instrument, setInstrument] = useState<InstrumentName>("acoustic_guitar_nylon");
-  const { playMidi, ensure, startSine, stopSine, ctxRef } = useSF(instrument);
+  const [reverbMix, setReverbMix] = useState(0.3);
+  const { playMidi, ensure, startSine, stopSine, ctxRef, updateReverbMix } = useSF(instrument, reverbMix);
   const drums = useDrumSampler();
+
+  useEffect(() => {
+    updateReverbMix(reverbMix);
+  }, [reverbMix]);
 
   /* ===== Execução ===== */
   const [patternId, setPatternId] = useState("folk1");
@@ -1055,7 +1105,7 @@ export default function App() {
 
       <div className="max-w-7xl mx-auto px-4 py-4 grid gap-6">
         {/* Configurações globais */}
-        <section className="grid lg:grid-cols-3 md:grid-cols-2 gap-4">
+        <section className="grid lg:grid-cols-4 md:grid-cols-2 gap-4">
           <div className="p-5 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
             <label className="block text-sm font-semibold mb-3 flex items-center gap-2">
               🎸 Instrumento
@@ -1094,6 +1144,28 @@ export default function App() {
               className="w-full h-2"
               style={{accentColor:'#10b981'}}
             />
+          </div>
+          <div className="p-5 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
+            <label className="block text-sm font-semibold mb-3 flex items-center gap-2">
+              🎛️ Reverb
+            </label>
+            <div className="mb-3 text-center">
+              <span className="text-2xl font-bold" style={{color:'#0ea5e9'}}>{Math.round(reverbMix * 100)}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={reverbMix}
+              onChange={e=>setReverbMix(parseFloat(e.target.value))}
+              className="w-full h-2"
+              style={{accentColor:'#0ea5e9'}}
+            />
+            <div className="flex justify-between text-xs text-slate-500 mt-2">
+              <span>Seco</span>
+              <span>Ambiente</span>
+            </div>
           </div>
         </section>
 
