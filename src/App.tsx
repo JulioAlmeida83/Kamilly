@@ -1370,11 +1370,11 @@ export default function App() {
             <select className="w-full rounded-xl border-2 p-3 font-medium" style={{borderColor:'#e2e8f0'}} value={instrument} onChange={(e)=>setInstrument(e.target.value as InstrumentName)}>
               <option value="acoustic_guitar_nylon">Violão Nylon</option>
               <option value="acoustic_guitar_steel">Violão Aço</option>
-              <option value="electric_guitar_clean">Guitarra Clean (Fender)</option>
-              <option value="electric_guitar_jazz">Guitarra Jazz (Gibson)</option>
-              <option value="electric_guitar_muted">Guitarra Muted (Gretsch)</option>
-              <option value="overdriven_guitar">Guitarra Overdrive (Gibson)</option>
-              <option value="distortion_guitar">Guitarra Distorção (Fender)</option>
+              <option value="electric_guitar_clean">Guitarra Clean</option>
+              <option value="electric_guitar_jazz">Guitarra Jazz</option>
+              <option value="electric_guitar_muted">Guitarra Muted</option>
+              <option value="overdriven_guitar">Guitarra Overdrive</option>
+              <option value="distortion_guitar">Guitarra Distorção</option>
               <option value="acoustic_grand_piano">Piano</option>
             </select>
           </div>
