@@ -343,6 +343,7 @@ function useSF(instrumentName: InstrumentName) {
   const ctxRef = useRef<AudioContext | null>(null);
   const instRef = useRef<SFInstrument | null>(null);
   const loadingRef = useRef(false);
+  const currentInstrumentRef = useRef<InstrumentName | null>(null);
 
   const ensure = async () => {
     if (!ctxRef.current) {
@@ -350,20 +351,29 @@ function useSF(instrumentName: InstrumentName) {
       ctxRef.current = new AudioCtx({ latencyHint: "interactive" });
     }
     if (ctxRef.current.state !== "running") await ctxRef.current.resume();
+    if (currentInstrumentRef.current !== instrumentName) {
+      instRef.current = null;
+      currentInstrumentRef.current = instrumentName;
+    }
     if (!instRef.current && !loadingRef.current) {
       loadingRef.current = true;
-      instRef.current = await Soundfont.instrument(ctxRef.current, instrumentName, {
-        gain: 1.2,
-        soundfont: 'MusyngKite'
-      });
+      try {
+        instRef.current = await Soundfont.instrument(ctxRef.current, instrumentName, {
+          gain: 1.2,
+          soundfont: 'MusyngKite'
+        });
+      } catch (e) {
+        console.error('Failed to load instrument:', e);
+      }
       loadingRef.current = false;
     }
   };
 
   const playMidi = async (midi: number, when = 0, dur = 0.25, vel = 0.9) => {
     await ensure();
-    const now = ctxRef.current!.currentTime;
-    instRef.current!.play(midi.toString(), now + Math.max(0, when), { gain: vel, duration: dur });
+    if (!ctxRef.current || !instRef.current) return;
+    const now = ctxRef.current.currentTime;
+    instRef.current.play(midi.toString(), now + Math.max(0, when), { gain: vel, duration: dur });
   };
 
   // Afinador por tom de referência (seno contínuo)
@@ -791,8 +801,7 @@ export default function App() {
     if (h === "o") void drums.playSample("openhat", 0, 0.6);
   };
 
-  const playSingleChordBar = async () => {
-    await drums.ensure();
+  const playSingleChordBar = () => {
     const accents = pattern.accents ?? [];
     const accMap = Array(8).fill(false).map((_,i)=>accents.includes(i));
     const steps = pattern.steps;
@@ -825,6 +834,7 @@ export default function App() {
 
   const handlePlaySingle = async () => {
     await startAudio();
+    await drums.ensure();
     if (seqTimerRef.current) { clearInterval(seqTimerRef.current); seqTimerRef.current = null; }
     if (singleTimerRef.current) { clearInterval(singleTimerRef.current); singleTimerRef.current = null; }
 
@@ -841,8 +851,7 @@ export default function App() {
   };
 
   // ========== SEQUÊNCIA ==========
-  const playSequenceBar = async (barIdx: number) => {
-    await drums.ensure();
+  const playSequenceBar = (barIdx: number) => {
     const item = sequence[barIdx];
     const voicing = CHORDS[item.key].variants[Math.min(item.varIdx, CHORDS[item.key].variants.length-1)];
     const accents = pattern.accents ?? [];
@@ -886,6 +895,7 @@ export default function App() {
 
   const handlePlaySequence = async () => {
     await startAudio();
+    await drums.ensure();
     if (singleTimerRef.current) { clearInterval(singleTimerRef.current); singleTimerRef.current = null; }
     if (seqTimerRef.current) { clearInterval(seqTimerRef.current); seqTimerRef.current = null; }
 
@@ -948,10 +958,25 @@ export default function App() {
   // Preview arpejado ao trocar voicing (parado)
   useEffect(() => {
     if (singleTimerRef.current || seqTimerRef.current) return;
+    let cancelled = false;
     (async () => {
-      await startAudio(); let i=0;
-      for (let s=0; s<6; s++) { const v = currentVoicing.shape[s]; if (v === "x" || v === 0) continue; const midi = TUNING_MIDI[s] + Number(v); await playMidi(midi, i*0.05, 0.18, 0.85); i++; }
+      try {
+        await startAudio();
+        if (cancelled) return;
+        let i=0;
+        for (let s=0; s<6; s++) {
+          if (cancelled) return;
+          const v = currentVoicing.shape[s];
+          if (v === "x" || v === 0) continue;
+          const midi = TUNING_MIDI[s] + Number(v);
+          await playMidi(midi, i*0.05, 0.18, 0.85);
+          i++;
+        }
+      } catch (e) {
+        console.error('Preview error:', e);
+      }
     })();
+    return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chordKey, variantIdx, instrument]);
 
