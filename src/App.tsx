@@ -1351,7 +1351,11 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 py-5">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-wide" style={{ color: "#ffffff", textShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>Toque Comigo</h1>
+              <h1 className="text-2xl font-bold tracking-wide" style={{ color: "#ffffff", textShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>
+                <span style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', color: '#f59e0b' }}>Play with me,</span>
+                {' '}
+                <span style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', color: '#ec4899', textShadow: '0 0 12px rgba(236,72,153,0.6)' }}>Kamilly</span>
+              </h1>
               <p className="text-sm mt-1" style={{ color: "#888" }}>MIXER · ACORDES · SEQUENCIADOR · TUNER</p>
             </div>
             <div className="flex gap-3">
@@ -1847,7 +1851,10 @@ export default function App() {
           </div>
         </section>
 
-        <footer className="text-xs text-gray-500 text-center pb-6">Kamilly Play — feito para funcionar bem em smartphones (layout rolável, botões grandes, header fixo).</footer>
+        <footer className="text-xs text-gray-500 text-center pb-6">
+          <p>Kamilly Play — feito para funcionar bem em smartphones (layout rolável, botões grandes, header fixo).</p>
+          <p className="mt-2" style={{ color: '#666', fontSize: '11px' }}>App criado e desenvolvido por <span style={{ color: '#888', fontWeight: '600' }}>Julio Rogerio Almeida de Souza</span></p>
+        </footer>
       </div>
     </div>
   );
