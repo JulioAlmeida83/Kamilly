@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Soundfont from "soundfont-player";
 
 /**
@@ -58,42 +58,165 @@ const CHORDS: Record<string, ChordEntry> = {
     { label: "A-shape x35553",shape: [X,3,5,5,5,3], fingers: [undefined,1,3,4,4,1], barre: { finger:1, fret:3, from:1, to:5 } },
     { label: "E-shape 8-10-10-9-8-8", shape: [8,10,10,9,8,8], fingers: [1,3,4,2,1,1], barre: { finger:1, fret:8, from:0, to:5 } },
   ]},
+  Cmaj7: { name: "Cmaj7 (Dó maior com sétima)", variants: [
+    { label: "Aberto x32000", shape: [X,3,2,0,0,0], fingers: [undefined,3,2,0,0,0] },
+    { label: "x35453", shape: [X,3,5,4,5,3], fingers: [undefined,1,3,2,4,1], barre: { finger:1, fret:3, from:1, to:5 } },
+  ]},
+  C7: { name: "C7 (Dó com sétima dominante)", variants: [
+    { label: "Aberto x32310", shape: [X,3,2,3,1,0], fingers: [undefined,3,2,4,1,0] },
+    { label: "x35353", shape: [X,3,5,3,5,3], fingers: [undefined,1,3,1,4,1], barre: { finger:1, fret:3, from:1, to:5 } },
+  ]},
+  Cm: { name: "Cm (Dó menor)", variants: [
+    { label: "Barra x35543", shape: [X,3,5,5,4,3], fingers: [undefined,1,3,4,2,1], barre: { finger:1, fret:3, from:1, to:5 } },
+    { label: "Cm7 8-10-8-8-8-8", shape: [8,10,8,8,8,8], fingers: [1,3,1,1,1,1], barre: { finger:1, fret:8, from:0, to:5 } },
+  ]},
+  Cm7: { name: "Cm7 (Dó menor com sétima)", variants: [
+    { label: "Barra x35343", shape: [X,3,5,3,4,3], fingers: [undefined,1,3,1,2,1], barre: { finger:1, fret:3, from:1, to:5 } },
+  ]},
+  Cdim: { name: "Cdim (Dó diminuto)", variants: [
+    { label: "xx1212", shape: [X,X,1,2,1,2], fingers: [undefined,undefined,1,3,2,4] },
+    { label: "x34242", shape: [X,3,4,2,4,2], fingers: [undefined,3,4,1,4,1] },
+  ]},
   D: { name: "D (Ré maior)", variants: [
     { label: "Aberto xx0232", shape: [X,X,0,2,3,2], fingers: [undefined,undefined,0,1,3,2] },
     { label: "D/F# 2x0232",   shape: [2,X,0,2,3,2], fingers: [2,undefined,0,1,3,2] },
     { label: "A-shape x57775",shape: [X,5,7,7,7,5], fingers: [undefined,1,3,4,4,1], barre: { finger:1, fret:5, from:1, to:5 } },
   ]},
+  Dmaj7: { name: "Dmaj7 (Ré maior com sétima)", variants: [
+    { label: "Aberto xx0222", shape: [X,X,0,2,2,2], fingers: [undefined,undefined,0,1,1,1] },
+    { label: "x57675", shape: [X,5,7,6,7,5], fingers: [undefined,1,3,2,4,1], barre: { finger:1, fret:5, from:1, to:5 } },
+  ]},
+  D7: { name: "D7 (Ré com sétima dominante)", variants: [
+    { label: "Aberto xx0212", shape: [X,X,0,2,1,2], fingers: [undefined,undefined,0,2,1,3] },
+    { label: "x57575", shape: [X,5,7,5,7,5], fingers: [undefined,1,3,1,4,1], barre: { finger:1, fret:5, from:1, to:5 } },
+  ]},
   Dm: { name: "Dm (Ré menor)", variants: [
     { label: "Aberto xx0231", shape: [X,X,0,2,3,1], fingers: [undefined,undefined,0,2,3,1] },
     { label: "A-shape x57765", shape: [X,5,7,7,6,5], fingers: [undefined,1,3,4,2,1], barre: { finger:1, fret:5, from:1, to:5 } },
+  ]},
+  Dm7: { name: "Dm7 (Ré menor com sétima)", variants: [
+    { label: "Aberto xx0211", shape: [X,X,0,2,1,1], fingers: [undefined,undefined,0,2,1,1] },
+    { label: "x57565", shape: [X,5,7,5,6,5], fingers: [undefined,1,3,1,2,1], barre: { finger:1, fret:5, from:1, to:5 } },
+  ]},
+  Ddim: { name: "Ddim (Ré diminuto)", variants: [
+    { label: "xx0101", shape: [X,X,0,1,0,1], fingers: [undefined,undefined,0,1,0,2] },
+    { label: "x56464", shape: [X,5,6,4,6,4], fingers: [undefined,2,3,1,4,1] },
   ]},
   E: { name: "E (Mi maior)", variants: [
     { label: "Aberto 022100", shape: [0,2,2,1,0,0], fingers: [0,2,3,1,0,0] },
     { label: "E/G# 4-2-2-1-0-0", shape: [4,2,2,1,0,0], fingers: [3,2,3,1,0,0] },
     { label: "E-shape 12-14-14-13-12-12", shape: [12,14,14,13,12,12], fingers: [1,3,4,2,1,1], barre: { finger:1, fret:12, from:0, to:5 } },
   ]},
+  Emaj7: { name: "Emaj7 (Mi maior com sétima)", variants: [
+    { label: "Aberto 021100", shape: [0,2,1,1,0,0], fingers: [0,2,1,1,0,0] },
+    { label: "xx2444", shape: [X,X,2,4,4,4], fingers: [undefined,undefined,1,3,3,3] },
+  ]},
+  E7: { name: "E7 (Mi com sétima dominante)", variants: [
+    { label: "Aberto 020100", shape: [0,2,0,1,0,0], fingers: [0,2,0,1,0,0] },
+    { label: "xx2434", shape: [X,X,2,4,3,4], fingers: [undefined,undefined,1,3,2,4] },
+  ]},
   Em: { name: "Em (Mi menor)", variants: [
     { label: "Aberto 022000", shape: [0,2,2,0,0,0], fingers: [0,2,3,0,0,0] },
     { label: "A-shape x79987", shape: [X,7,9,9,8,7], fingers: [undefined,1,3,4,2,1], barre: { finger:1, fret:7, from:1, to:5 } },
+  ]},
+  Em7: { name: "Em7 (Mi menor com sétima)", variants: [
+    { label: "Aberto 020000", shape: [0,2,0,0,0,0], fingers: [0,2,0,0,0,0] },
+    { label: "022030", shape: [0,2,2,0,3,0], fingers: [0,2,3,0,4,0] },
+  ]},
+  Edim: { name: "Edim (Mi diminuto)", variants: [
+    { label: "xx2323", shape: [X,X,2,3,2,3], fingers: [undefined,undefined,1,3,2,4] },
+    { label: "x78686", shape: [X,7,8,6,8,6], fingers: [undefined,2,3,1,4,1] },
   ]},
   F: { name: "F (Fá maior)", variants: [
     { label: "E-shape 133211", shape: [1,3,3,2,1,1], fingers: [1,3,4,2,1,1], barre: { finger:1, fret:1, from:0, to:5 } },
     { label: "Fmaj7 xx3210",  shape: [X,X,3,2,1,0], fingers: [undefined,undefined,3,2,1,0] },
   ]},
+  Fmaj7: { name: "Fmaj7 (Fá maior com sétima)", variants: [
+    { label: "Aberto xx3210", shape: [X,X,3,2,1,0], fingers: [undefined,undefined,3,2,1,0] },
+    { label: "1-3-2-2-1-1", shape: [1,3,2,2,1,1], fingers: [1,3,2,2,1,1], barre: { finger:1, fret:1, from:0, to:5 } },
+  ]},
+  F7: { name: "F7 (Fá com sétima dominante)", variants: [
+    { label: "131211", shape: [1,3,1,2,1,1], fingers: [1,3,1,2,1,1], barre: { finger:1, fret:1, from:0, to:5 } },
+    { label: "xx3545", shape: [X,X,3,5,4,5], fingers: [undefined,undefined,1,3,2,4] },
+  ]},
+  Fm: { name: "Fm (Fá menor)", variants: [
+    { label: "E-shape 133111", shape: [1,3,3,1,1,1], fingers: [1,3,4,1,1,1], barre: { finger:1, fret:1, from:0, to:5 } },
+  ]},
+  Fm7: { name: "Fm7 (Fá menor com sétima)", variants: [
+    { label: "131111", shape: [1,3,1,1,1,1], fingers: [1,3,1,1,1,1], barre: { finger:1, fret:1, from:0, to:5 } },
+  ]},
+  Fdim: { name: "Fdim (Fá diminuto)", variants: [
+    { label: "xx3434", shape: [X,X,3,4,3,4], fingers: [undefined,undefined,1,3,2,4] },
+    { label: "1-2-3-1-3-1", shape: [1,2,3,1,3,1], fingers: [1,2,3,1,4,1] },
+  ]},
   G: { name: "G (Sol maior)", variants: [
     { label: "Aberto 320003", shape: [3,2,0,0,0,3], fingers: [3,2,0,0,0,4] },
     { label: "E-shape 355433", shape: [3,5,5,4,3,3], fingers: [1,3,4,2,1,1], barre: { finger:1, fret:3, from:0, to:5 } },
+  ]},
+  Gmaj7: { name: "Gmaj7 (Sol maior com sétima)", variants: [
+    { label: "Aberto 320002", shape: [3,2,0,0,0,2], fingers: [3,2,0,0,0,1] },
+    { label: "3-5-4-4-3-3", shape: [3,5,4,4,3,3], fingers: [1,3,2,2,1,1], barre: { finger:1, fret:3, from:0, to:5 } },
+  ]},
+  G7: { name: "G7 (Sol com sétima dominante)", variants: [
+    { label: "Aberto 320001", shape: [3,2,0,0,0,1], fingers: [3,2,0,0,0,1] },
+    { label: "353433", shape: [3,5,3,4,3,3], fingers: [1,3,1,2,1,1], barre: { finger:1, fret:3, from:0, to:5 } },
+  ]},
+  Gm: { name: "Gm (Sol menor)", variants: [
+    { label: "Barra 355333", shape: [3,5,5,3,3,3], fingers: [1,3,4,1,1,1], barre: { finger:1, fret:3, from:0, to:5 } },
+  ]},
+  Gm7: { name: "Gm7 (Sol menor com sétima)", variants: [
+    { label: "353333", shape: [3,5,3,3,3,3], fingers: [1,3,1,1,1,1], barre: { finger:1, fret:3, from:0, to:5 } },
+  ]},
+  Gdim: { name: "Gdim (Sol diminuto)", variants: [
+    { label: "xx5656", shape: [X,X,5,6,5,6], fingers: [undefined,undefined,1,3,2,4] },
+    { label: "3-4-5-3-5-3", shape: [3,4,5,3,5,3], fingers: [1,2,3,1,4,1] },
   ]},
   A: { name: "A (Lá maior)", variants: [
     { label: "Aberto x02220", shape: [X,0,2,2,2,0], fingers: [undefined,0,1,2,3,0] },
     { label: "E-shape 577655", shape: [5,7,7,6,5,5], fingers: [1,3,4,2,1,1], barre: { finger:1, fret:5, from:0, to:5 } },
   ]},
+  Amaj7: { name: "Amaj7 (Lá maior com sétima)", variants: [
+    { label: "Aberto x02120", shape: [X,0,2,1,2,0], fingers: [undefined,0,2,1,3,0] },
+    { label: "5-7-6-6-5-5", shape: [5,7,6,6,5,5], fingers: [1,3,2,2,1,1], barre: { finger:1, fret:5, from:0, to:5 } },
+  ]},
+  A7: { name: "A7 (Lá com sétima dominante)", variants: [
+    { label: "Aberto x02020", shape: [X,0,2,0,2,0], fingers: [undefined,0,2,0,3,0] },
+    { label: "575655", shape: [5,7,5,6,5,5], fingers: [1,3,1,2,1,1], barre: { finger:1, fret:5, from:0, to:5 } },
+  ]},
   Am: { name: "Am (Lá menor)", variants: [
     { label: "Aberto x02210", shape: [X,0,2,2,1,0], fingers: [undefined,0,2,3,1,0] },
     { label: "E-shape 577555", shape: [5,7,7,5,5,5], fingers: [1,3,4,1,1,1], barre: { finger:1, fret:5, from:0, to:5 } },
   ]},
+  Am7: { name: "Am7 (Lá menor com sétima)", variants: [
+    { label: "Aberto x02010", shape: [X,0,2,0,1,0], fingers: [undefined,0,2,0,1,0] },
+    { label: "575555", shape: [5,7,5,5,5,5], fingers: [1,3,1,1,1,1], barre: { finger:1, fret:5, from:0, to:5 } },
+  ]},
+  Adim: { name: "Adim (Lá diminuto)", variants: [
+    { label: "x01212", shape: [X,0,1,2,1,2], fingers: [undefined,0,1,3,2,4] },
+    { label: "xx7878", shape: [X,X,7,8,7,8], fingers: [undefined,undefined,1,3,2,4] },
+  ]},
+  B: { name: "B (Si maior)", variants: [
+    { label: "x24442", shape: [X,2,4,4,4,2], fingers: [undefined,1,3,3,3,1], barre: { finger:1, fret:2, from:1, to:5 } },
+    { label: "799877", shape: [7,9,9,8,7,7], fingers: [1,3,4,2,1,1], barre: { finger:1, fret:7, from:0, to:5 } },
+  ]},
+  Bmaj7: { name: "Bmaj7 (Si maior com sétima)", variants: [
+    { label: "x24342", shape: [X,2,4,3,4,2], fingers: [undefined,1,3,2,4,1], barre: { finger:1, fret:2, from:1, to:5 } },
+  ]},
+  B7: { name: "B7 (Si com sétima dominante)", variants: [
+    { label: "x21202", shape: [X,2,1,2,0,2], fingers: [undefined,2,1,3,0,4] },
+    { label: "797877", shape: [7,9,7,8,7,7], fingers: [1,3,1,2,1,1], barre: { finger:1, fret:7, from:0, to:5 } },
+  ]},
   Bm: { name: "Bm (Si menor)", variants: [
     { label: "x24432 (barra)", shape: [X,2,4,4,3,2], fingers: [undefined,1,3,4,2,1], barre: { finger:1, fret:2, from:1, to:5 } },
+    { label: "799777", shape: [7,9,9,7,7,7], fingers: [1,3,4,1,1,1], barre: { finger:1, fret:7, from:0, to:5 } },
+  ]},
+  Bm7: { name: "Bm7 (Si menor com sétima)", variants: [
+    { label: "x24232", shape: [X,2,4,2,3,2], fingers: [undefined,1,3,1,2,1], barre: { finger:1, fret:2, from:1, to:5 } },
+    { label: "x20202", shape: [X,2,0,2,0,2], fingers: [undefined,2,0,3,0,4] },
+  ]},
+  Bdim: { name: "Bdim (Si diminuto)", variants: [
+    { label: "x23434", shape: [X,2,3,4,3,4], fingers: [undefined,1,2,4,2,4] },
+    { label: "xx9-10-9-10", shape: [X,X,9,10,9,10], fingers: [undefined,undefined,1,3,2,4] },
   ]},
 };
 const CHORD_KEYS = Object.keys(CHORDS);
@@ -132,7 +255,7 @@ function useSF(instrumentName: InstrumentName) {
   const playMidi = async (midi: number, when = 0, dur = 0.25, vel = 0.85) => {
     await ensure();
     const now = ctxRef.current!.currentTime;
-    instRef.current!.play(midi, now + Math.max(0, when), { gain: vel, duration: dur });
+    instRef.current!.play(midi.toString(), now + Math.max(0, when), { gain: vel, duration: dur });
   };
 
   // Afinador por tom de referência (seno contínuo)
@@ -282,7 +405,7 @@ function useChromaticTuner() {
       if (f > 0) {
         setFreq(f);
         const midi = Math.round(hzToMidi(f));
-        const name = NOTE_NAMES[(midi % 12 + 12) % 12];
+        const name = NOTE_NAMES[(midi % 12 + 12) % 12] || "C";
         const target = 440 * Math.pow(2, (midi - 69) / 12);
         const cents = Math.round(1200 * Math.log2(f / target));
         setNote(name + Math.floor(midi/12 - 1));
@@ -305,10 +428,9 @@ function useChromaticTuner() {
 /** ===== Utilidades de notas/roots e sequência por tom ===== */
 const CHROMA = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const toIndex = (n: string) => CHROMA.indexOf(n);
-const fromIndex = (i: number) => CHROMA[(i%12+12)%12];
 
 function parseChordSymbol(sym: string): { root: string; qual: string } {
-  const m = sym.match(/^(C#|Db|D#|Eb|F#|Gb|G#|Ab|A#|Bb|[A-G])(m|maj7|m7|7|sus2|sus4|dim|°)?$/i);
+  const m = sym.match(/^(C#|Db|D#|Eb|F#|Gb|G#|Ab|A#|Bb|[A-G])(maj7|m7b5|m7|7|m|sus2|sus4|dim|°)?$/i);
   if (!m) return { root: sym[0].toUpperCase(), qual: sym.slice(1) };
   let root = m[1].toUpperCase();
   root = root.replace("DB","C#").replace("EB","D#").replace("GB","F#").replace("AB","G#").replace("BB","A#");
@@ -340,15 +462,36 @@ function buildDefaultSeqSymbols(tonicRoot: string) {
 }
 
 function mapSymbolToDictKey(sym: string): string {
-  // se existir no dicionário, retorna
   if (CHORDS[sym as keyof typeof CHORDS]) return sym;
-  // fallback: se for m/dim e não existir, tenta maior
   const p = parseChordSymbol(sym);
+
+  if (p.qual === "maj7") {
+    const maj7 = p.root + "maj7";
+    if (CHORDS[maj7 as keyof typeof CHORDS]) return maj7;
+    const maj = p.root;
+    if (CHORDS[maj as keyof typeof CHORDS]) return maj;
+  }
+  if (p.qual === "m7") {
+    const m7 = p.root + "m7";
+    if (CHORDS[m7 as keyof typeof CHORDS]) return m7;
+    const min = p.root + "m";
+    if (CHORDS[min as keyof typeof CHORDS]) return min;
+  }
+  if (p.qual === "7") {
+    const dom7 = p.root + "7";
+    if (CHORDS[dom7 as keyof typeof CHORDS]) return dom7;
+    const maj = p.root;
+    if (CHORDS[maj as keyof typeof CHORDS]) return maj;
+  }
   if (p.qual === "m") {
+    const min = p.root + "m";
+    if (CHORDS[min as keyof typeof CHORDS]) return min;
     const maj = p.root;
     if (CHORDS[maj as keyof typeof CHORDS]) return maj;
   }
   if (p.qual === "dim") {
+    const dim = p.root + "dim";
+    if (CHORDS[dim as keyof typeof CHORDS]) return dim;
     const min = p.root + "m";
     if (CHORDS[min as keyof typeof CHORDS]) return min;
     const maj = p.root;
@@ -365,10 +508,10 @@ export default function App() {
 
   /* ===== Execução ===== */
   const [patternId, setPatternId] = useState("folk1");
-  const [bpm, setBpm] = useState(92);
-  const [swing, setSwing] = useState(0.08);
-  const [strumMs, setStrumMs] = useState(12);
-  const [sustain, setSustain] = useState(0.24);
+  const [bpm] = useState(92);
+  const [swing] = useState(0.08);
+  const [strumMs] = useState(12);
+  const [sustain] = useState(0.24);
 
   /* ===== Seleção rápida ===== */
   const [chordKey, setChordKey] = useState("C");
@@ -581,11 +724,17 @@ export default function App() {
           {/* faixa de roots sincronizada */}
           <div className="flex gap-2 flex-wrap items-center text-xs">
             {sequence.map((it, idx) => {
-              const r = parseChordSymbol(it.key).root + (it.key.endsWith("m") ? "m" : (it.key.endsWith("dim") ? "°" : ""));
+              const p = parseChordSymbol(it.key);
+              let display = p.root;
+              if (it.key.includes("maj7")) display += "maj7";
+              else if (it.key.includes("m7")) display += "m7";
+              else if (it.key.endsWith("7")) display += "7";
+              else if (it.key.endsWith("m")) display += "m";
+              else if (it.key.includes("dim")) display += "°";
               const active = currentBar===idx;
               return (
                 <span key={idx} className="px-2 py-1 rounded-full" style={{background: active? '#4f46e5' : '#e2e8f0', color: active? '#fff' : '#0f172a'}}>
-                  {r}
+                  {display}
                 </span>
               );
             })}
@@ -598,14 +747,21 @@ export default function App() {
                   <div className="text-[11px] text-neutral-600 mb-2 flex items-center justify-between">
                     <span>{idx + 1}º compasso</span>
                     <span className="px-2 py-0.5 rounded-full text-[10px]" style={{background:'#f1f5f9'}}>
-                      {parseChordSymbol(it.key).root}{it.key.endsWith("m")?"m":(it.key.endsWith("dim")?"°":"")}
+                      {(() => {
+                        const p = parseChordSymbol(it.key);
+                        let d = p.root;
+                        if (it.key.includes("maj7")) d += "maj7";
+                        else if (it.key.includes("m7")) d += "m7";
+                        else if (it.key.endsWith("7")) d += "7";
+                        else if (it.key.endsWith("m")) d += "m";
+                        else if (it.key.includes("dim")) d += "°";
+                        return d;
+                      })()}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <select className="flex-1 text-sm" value={it.key} onChange={(e)=>{ const v = e.target.value; const copy=[...sequence]; copy[idx] = { ...copy[idx], key:v }; setSequence(copy); }}>
                       {CHORD_KEYS.map(k=> <option key={k} value={k}>{k}</option>)}
-                      {/* extras comuns */}
-                      {["Dm","Em","Bm"].map(k=> <option key={k} value={k}>{k}</option>)}
                     </select>
                     <select className="w-[110px] text-sm" value={it.varIdx} onChange={(e)=>{ const v = Number(e.target.value); const copy=[...sequence]; copy[idx] = { ...copy[idx], varIdx:v }; setSequence(copy); }}>
                       {CHORDS[(sequence[idx].key in CHORDS ? sequence[idx].key : "C") as keyof typeof CHORDS].variants.map((v,i)=> <option key={i} value={i}>{v.label}</option>)}
