@@ -595,8 +595,6 @@ export default function App() {
   /* ===== Seleção rápida ===== */
   const [chordKey, setChordKey] = useState("C");
   const [variantIdx, setVariantIdx] = useState(0);
-  const [nowKey, setNowKey] = useState<string | null>(null);
-  const [nowVarIdx, setNowVarIdx] = useState<number>(0);
 
   /* ===== Tonalidade e Progressão ===== */
   const [key, setKey] = useState("C");
@@ -608,28 +606,34 @@ export default function App() {
   const initialSeq: SeqItem[] = initialSeqSymbols.map((sym, i) => ({ key: mapSymbolToDictKey(sym), varIdx: 0, degreeIdx: i }));
   const [sequence, setSequence] = useState<SeqItem[]>(initialSeq);
   const [currentBar, setCurrentBar] = useState<number>(-1);
-  const [loop, setLoop] = useState<boolean>(true);
+  const [loopSequence, setLoopSequence] = useState<boolean>(true);
+
+  /* ===== Acorde individual com loop ===== */
+  const [loopSingle, setLoopSingle] = useState<boolean>(false);
+  const [isPlayingSingle, setIsPlayingSingle] = useState(false);
   const [isPlayingSequence, setIsPlayingSequence] = useState(false);
 
   const pattern = useMemo(() => PATTERNS.find(p => p.id === patternId)!, [patternId]);
   const currentVoicing = CHORDS[chordKey].variants[Math.min(variantIdx, CHORDS[chordKey].variants.length-1)];
-  const displayedVoicing = nowKey ? CHORDS[nowKey].variants[Math.min(nowVarIdx, CHORDS[nowKey].variants.length-1)] : currentVoicing;
 
-  const timerRef = useRef<number | null>(null);
-  const stepIdxRef = useRef(0);
-  const barIdxRef = useRef(0);
+  const singleTimerRef = useRef<number | null>(null);
+  const singleStepIdxRef = useRef(0);
+
+  const seqTimerRef = useRef<number | null>(null);
+  const seqStepIdxRef = useRef(0);
+  const seqBarIdxRef = useRef(0);
 
   const startAudio = async () => { await ensure(); if (ctxRef.current?.state !== "running") await ctxRef.current?.resume(); };
 
-  const playChordStrum = async (voicing: Voicing, accentMap: boolean[], isDown: boolean) => {
+  const playChordStrum = async (voicing: Voicing, accentMap: boolean[], isDown: boolean, stepIdx: number) => {
     const order = isDown ? [0,1,2,3,4,5] : [5,4,3,2,1,0];
     const baseVel = 0.9;
     for (let i=0;i<order.length;i++) {
       const s = order[i]; const v = voicing.shape[s]; if (v === "x") continue;
       const midi = TUNING_MIDI[s] + Number(v);
-      const swingPush = (stepIdxRef.current % 2 === 1) ? swing * (60 / bpm) / 2 : 0;
+      const swingPush = (stepIdx % 2 === 1) ? swing * (60 / bpm) / 2 : 0;
       const when = i * (strumMs/1000) + swingPush;
-      const vel = baseVel * (isDown ? (1 - i*0.05) : (1 - i*0.04)) * (accentMap[stepIdxRef.current%8] ? 1.0 : 0.85);
+      const vel = baseVel * (isDown ? (1 - i*0.05) : (1 - i*0.04)) * (accentMap[stepIdx%8] ? 1.0 : 0.85);
       await playMidi(midi, when, sustain, Math.max(0.1, Math.min(1, vel)));
     }
   };
@@ -656,66 +660,106 @@ export default function App() {
     await playMidi(m, 0, Math.max(0.22, sustain), 1.0);
   };
 
-  const playBar = async (voicing: Voicing, keyForUi?: string, varForUi?: number) => {
-    if (keyForUi) { setNowKey(keyForUi); setNowVarIdx(varForUi ?? 0); }
-    setCurrentBar(barIdxRef.current);
-    const accents = pattern.accents ?? []; const accMap = Array(8).fill(false).map((_,i)=>accents.includes(i));
-    const steps = pattern.steps; const stepMs = (60_000 / bpm) / 2;
-    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
-    stepIdxRef.current = 0;
+  // ========== ACORDE INDIVIDUAL ==========
+  const playSingleChordBar = () => {
+    const accents = pattern.accents ?? [];
+    const accMap = Array(8).fill(false).map((_,i)=>accents.includes(i));
+    const steps = pattern.steps;
+    const stepMs = (60_000 / bpm) / 2;
+    const rootName = parseChordSymbol(chordKey).root;
 
-    const rootName = parseChordSymbol(keyForUi ?? (nowKey ?? chordKey)).root;
+    singleStepIdxRef.current = 0;
 
-    timerRef.current = window.setInterval(() => {
-      const idx = stepIdxRef.current % 8; const st = steps[idx];
-      if (idx === 0) { void playRootHit(voicing, rootName); }
-      if (st !== "-") void playChordStrum(voicing, accMap, st === "D");
-      stepIdxRef.current += 1;
-      if (stepIdxRef.current >= 8) {
-        clearInterval(timerRef.current!); timerRef.current = null;
-        barIdxRef.current = barIdxRef.current + 1;
-        if (barIdxRef.current >= sequence.length) {
-          if (loop) {
-            barIdxRef.current = 0;
-          } else {
-            setCurrentBar(-1); setNowKey(null); return;
-          }
+    singleTimerRef.current = window.setInterval(() => {
+      const idx = singleStepIdxRef.current % 8;
+      const st = steps[idx];
+      if (idx === 0) { void playRootHit(currentVoicing, rootName); }
+      if (st !== "-") void playChordStrum(currentVoicing, accMap, st === "D", singleStepIdxRef.current);
+      singleStepIdxRef.current += 1;
+
+      if (singleStepIdxRef.current >= 8) {
+        if (loopSingle) {
+          singleStepIdxRef.current = 0;
+        } else {
+          clearInterval(singleTimerRef.current!);
+          singleTimerRef.current = null;
+          setIsPlayingSingle(false);
         }
-        setCurrentBar(barIdxRef.current);
-        const next = sequence[barIdxRef.current];
-        const nv = CHORDS[next.key].variants[Math.min(next.varIdx, CHORDS[next.key].variants.length-1)];
-        void playBar(nv, next.key, next.varIdx);
       }
     }, stepMs);
   };
 
   const handlePlaySingle = async () => {
     await startAudio();
-    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
-    barIdxRef.current = 0;
-    setNowKey(chordKey);
-    setNowVarIdx(variantIdx);
-    setCurrentBar(-1);
+    if (seqTimerRef.current) { clearInterval(seqTimerRef.current); seqTimerRef.current = null; }
+    if (singleTimerRef.current) { clearInterval(singleTimerRef.current); singleTimerRef.current = null; }
+
     setIsPlayingSequence(false);
-    await playBar(currentVoicing, chordKey, variantIdx);
+    setIsPlayingSingle(true);
+    setCurrentBar(-1);
+
+    playSingleChordBar();
+  };
+
+  const handleStopSingle = () => {
+    if (singleTimerRef.current) { clearInterval(singleTimerRef.current); singleTimerRef.current = null; }
+    setIsPlayingSingle(false);
+  };
+
+  // ========== SEQUÊNCIA ==========
+  const playSequenceBar = (barIdx: number) => {
+    const item = sequence[barIdx];
+    const voicing = CHORDS[item.key].variants[Math.min(item.varIdx, CHORDS[item.key].variants.length-1)];
+    const accents = pattern.accents ?? [];
+    const accMap = Array(8).fill(false).map((_,i)=>accents.includes(i));
+    const steps = pattern.steps;
+    const stepMs = (60_000 / bpm) / 2;
+    const rootName = parseChordSymbol(item.key).root;
+
+    setCurrentBar(barIdx);
+    seqStepIdxRef.current = 0;
+
+    seqTimerRef.current = window.setInterval(() => {
+      const idx = seqStepIdxRef.current % 8;
+      const st = steps[idx];
+      if (idx === 0) { void playRootHit(voicing, rootName); }
+      if (st !== "-") void playChordStrum(voicing, accMap, st === "D", seqStepIdxRef.current);
+      seqStepIdxRef.current += 1;
+
+      if (seqStepIdxRef.current >= 8) {
+        clearInterval(seqTimerRef.current!);
+        seqTimerRef.current = null;
+        seqBarIdxRef.current += 1;
+
+        if (seqBarIdxRef.current >= sequence.length) {
+          if (loopSequence) {
+            seqBarIdxRef.current = 0;
+            playSequenceBar(0);
+          } else {
+            setCurrentBar(-1);
+            setIsPlayingSequence(false);
+          }
+        } else {
+          playSequenceBar(seqBarIdxRef.current);
+        }
+      }
+    }, stepMs);
   };
 
   const handlePlaySequence = async () => {
     await startAudio();
-    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
-    barIdxRef.current = 0;
-    const first = sequence[0];
-    setNowKey(first.key);
-    setNowVarIdx(first.varIdx);
-    setCurrentBar(0);
+    if (singleTimerRef.current) { clearInterval(singleTimerRef.current); singleTimerRef.current = null; }
+    if (seqTimerRef.current) { clearInterval(seqTimerRef.current); seqTimerRef.current = null; }
+
+    setIsPlayingSingle(false);
     setIsPlayingSequence(true);
-    const v = CHORDS[first.key].variants[Math.min(first.varIdx, CHORDS[first.key].variants.length-1)];
-    await playBar(v, first.key, first.varIdx);
+    seqBarIdxRef.current = 0;
+
+    playSequenceBar(0);
   };
 
-  const handleStop = () => {
-    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
-    setNowKey(null);
+  const handleStopSequence = () => {
+    if (seqTimerRef.current) { clearInterval(seqTimerRef.current); seqTimerRef.current = null; }
     setCurrentBar(-1);
     setIsPlayingSequence(false);
   };
@@ -765,7 +809,7 @@ export default function App() {
 
   // Preview arpejado ao trocar voicing (parado)
   useEffect(() => {
-    if (timerRef.current) return;
+    if (singleTimerRef.current || seqTimerRef.current) return;
     (async () => {
       await startAudio(); let i=0;
       for (let s=0; s<6; s++) { const v = currentVoicing.shape[s]; if (v === "x" || v === 0) continue; const midi = TUNING_MIDI[s] + Number(v); await playMidi(midi, i*0.05, 0.18, 0.85); i++; }
@@ -783,70 +827,106 @@ export default function App() {
     <div className="min-h-screen w-full" style={{ background: "linear-gradient(135deg,#f8fafc,#eef2ff)", color: "#0f172a" }}>
       {/* Header sticky */}
       <div style={{ position:"sticky", top:0, zIndex:20, backdropFilter:"blur(8px)", background:"linear-gradient(135deg,rgba(255,255,255,.85),rgba(238,242,255,.85))", borderBottom:"1px solid #e5e7eb" }}>
-        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-baseline gap-3">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-baseline gap-3 mb-2">
             <h1 className="text-xl md:text-2xl font-bold tracking-tight">Kamilly Play</h1>
             <span className="text-xs md:text-sm text-slate-600">Acordes · Ritmos · Sequência · Afinadores</span>
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={handlePlaySingle} disabled={isPlayingSequence} className="px-3 py-2 rounded-xl disabled:opacity-50" style={{background:'#4f46e5',color:'#fff', boxShadow:'0 2px 6px rgba(79,70,229,.3)'}}>▶️ Acorde</button>
-            <button onClick={handlePlaySequence} className="px-3 py-2 rounded-xl" style={{background:'#16a34a',color:'#fff', boxShadow:'0 2px 6px rgba(22,163,74,.3)'}}>🎼 Sequência</button>
-            <button onClick={handleStop} className="px-3 py-2 rounded-xl" style={{background:'#dc2626',color:'#fff'}}>⏹️</button>
+          <div className="flex flex-wrap gap-2 items-center text-xs text-slate-600">
+            <span className="font-medium">Ritmo: {pattern.label}</span>
+            <span>·</span>
+            <span>Instrumento: {instrument.replaceAll('_', ' ')}</span>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-4 grid gap-6">
-        {/* Painel principal: seleção + ritmo */}
-        <section className="grid lg:grid-cols-2 gap-6">
-          <div className="space-y-4 p-4 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
-            <div className="grid sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium">Instrumento</label>
-                <select className="w-full rounded-xl border p-2" value={instrument} onChange={(e)=>setInstrument(e.target.value as InstrumentName)}>
-                  {INSTRUMENTS.map(n=> <option key={n} value={n}>{n.replaceAll('_',' ')}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium">Ritmo</label>
-                <select className="w-full rounded-xl border p-2" value={patternId} onChange={(e)=>setPatternId(e.target.value)}>
-                  {PATTERNS.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
-                </select>
-              </div>
-            </div>
-
-            {/* Acorde + variação em linha */}
-            <div className="flex flex-wrap items-end gap-3">
-              <div className="min-w-[180px]">
-                <label className="block text-sm font-medium">Acorde</label>
-                <select className="w-full rounded-xl border p-2" value={chordKey} onChange={(e)=>{setChordKey(e.target.value); setVariantIdx(0);}}>
-                  {CHORD_KEYS.map(k => <option key={k} value={k}>{CHORDS[k].name}</option>)}
-                </select>
-              </div>
-              <div className="min-w-[220px]">
-                <label className="block text-sm font-medium">Variação (voicing)</label>
-                <select className="w-full rounded-xl border p-2" value={variantIdx} onChange={(e)=>setVariantIdx(Number(e.target.value))}>
-                  {CHORDS[chordKey].variants.map((v,i)=> <option key={i} value={i}>{v.label}</option>)}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Fretboard sincronizado */}
+        {/* Configurações globais */}
+        <section className="grid sm:grid-cols-2 gap-4">
           <div className="p-4 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
-            <Fretboard shape={displayedVoicing.shape} fingers={displayedVoicing.fingers} barre={displayedVoicing.barre} />
-            <p style={{fontSize:12, textAlign:'center', marginTop:8, color:'#475569'}}>
-              {(nowKey ?? chordKey) && (<>
-                {CHORDS[nowKey ?? chordKey].name} · {CHORDS[nowKey ?? chordKey].variants[nowKey ? nowVarIdx : variantIdx].label}
-              </>)}
-            </p>
+            <label className="block text-sm font-medium mb-2">Instrumento</label>
+            <select className="w-full rounded-xl border p-2" value={instrument} onChange={(e)=>setInstrument(e.target.value as InstrumentName)}>
+              {INSTRUMENTS.map(n=> <option key={n} value={n}>{n.replaceAll('_',' ')}</option>)}
+            </select>
+          </div>
+          <div className="p-4 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
+            <label className="block text-sm font-medium mb-2">Ritmo</label>
+            <select className="w-full rounded-xl border p-2" value={patternId} onChange={(e)=>setPatternId(e.target.value)}>
+              {PATTERNS.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
+            </select>
           </div>
         </section>
 
-        {/* Sequência de acordes por tonalidade */}
-        <section className="space-y-3 p-4 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
-          <div>
-            <div className="text-sm font-medium">Sequência de Acordes</div>
+        {/* ACORDE INDIVIDUAL */}
+        <section className="p-4 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)', border: isPlayingSingle ? '2px solid #4f46e5' : '2px solid transparent'}}>
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              🎸 Acorde Individual
+              {isPlayingSingle && <span className="text-xs px-2 py-1 rounded-full" style={{background:'#4f46e5', color:'#fff'}}>Tocando</span>}
+            </h2>
+            <p className="text-xs text-slate-500 mt-1">Escolha um acorde e toque em loop ou uma vez</p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-xs font-medium mb-1">Acorde</label>
+                  <select className="w-full rounded-xl border p-2" value={chordKey} onChange={(e)=>{setChordKey(e.target.value); setVariantIdx(0);}}>
+                    {CHORD_KEYS.map(k => <option key={k} value={k}>{CHORDS[k].name}</option>)}
+                  </select>
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-medium mb-1">Voicing</label>
+                  <select className="w-full rounded-xl border p-2" value={variantIdx} onChange={(e)=>setVariantIdx(Number(e.target.value))}>
+                    {CHORDS[chordKey].variants.map((v,i)=> <option key={i} value={i}>{v.label.split(' ')[0]}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label className="text-xs flex items-center gap-2">
+                  <input type="checkbox" checked={loopSingle} onChange={e=>setLoopSingle(e.target.checked)} />
+                  Loop (repetir)
+                </label>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={handlePlaySingle}
+                  disabled={isPlayingSequence}
+                  className="flex-1 px-4 py-3 rounded-xl font-medium disabled:opacity-50"
+                  style={{background:'#4f46e5',color:'#fff', boxShadow:'0 2px 6px rgba(79,70,229,.3)'}}
+                >
+                  {isPlayingSingle ? '🔄 Tocando...' : '▶️ Tocar Acorde'}
+                </button>
+                <button
+                  onClick={handleStopSingle}
+                  disabled={!isPlayingSingle}
+                  className="px-4 py-3 rounded-xl font-medium disabled:opacity-30"
+                  style={{background:'#dc2626',color:'#fff'}}
+                >
+                  ⏹️
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <Fretboard shape={currentVoicing.shape} fingers={currentVoicing.fingers} barre={currentVoicing.barre} />
+              <p style={{fontSize:11, textAlign:'center', marginTop:8, color:'#475569'}}>
+                {CHORDS[chordKey].name} · {CHORDS[chordKey].variants[variantIdx].label}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* SEQUÊNCIA DE ACORDES */}
+        <section className="space-y-3 p-4 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)', border: isPlayingSequence ? '2px solid #16a34a' : '2px solid transparent'}}>
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              🎼 Sequência de Acordes
+              {isPlayingSequence && <span className="text-xs px-2 py-1 rounded-full" style={{background:'#16a34a', color:'#fff'}}>Tocando</span>}
+            </h2>
             <p className="text-xs text-slate-500 mt-1">Escolha uma tonalidade e progressão. Os acordes se ajustam automaticamente. Use alternativas para variar o som.</p>
           </div>
 
@@ -866,12 +946,28 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            <label className="text-xs flex items-center gap-2"><input type="checkbox" checked={loop} onChange={e=>setLoop(e.target.checked)} /> Loop</label>
-            <button
-              className="ml-auto px-3 py-1.5 rounded-xl text-xs"
-              style={{background:'#4f46e5', color:'#fff'}}
-              onClick={()=>setSequence([...sequence, { key: sequence.at(-1)?.key ?? 'C', varIdx: 0, degreeIdx: -1 }])}
-            >+ Adicionar compasso</button>
+            <label className="text-xs flex items-center gap-2">
+              <input type="checkbox" checked={loopSequence} onChange={e=>setLoopSequence(e.target.checked)} />
+              Loop (repetir)
+            </label>
+            <div className="ml-auto flex gap-2">
+              <button
+                onClick={handlePlaySequence}
+                disabled={isPlayingSingle}
+                className="px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-50"
+                style={{background:'#16a34a',color:'#fff', boxShadow:'0 2px 6px rgba(22,163,74,.3)'}}
+              >
+                {isPlayingSequence ? '🔄 Tocando...' : '▶️ Tocar Sequência'}
+              </button>
+              <button
+                onClick={handleStopSequence}
+                disabled={!isPlayingSequence}
+                className="px-4 py-2 rounded-xl text-sm font-medium disabled:opacity-30"
+                style={{background:'#dc2626',color:'#fff'}}
+              >
+                ⏹️
+              </button>
+            </div>
           </div>
 
           {/* faixa de roots sincronizada */}
@@ -885,6 +981,14 @@ export default function App() {
                 </span>
               );
             })}
+          </div>
+
+          <div className="flex justify-end mb-2">
+            <button
+              className="px-3 py-1.5 rounded-xl text-xs"
+              style={{background:'#e2e8f0'}}
+              onClick={()=>setSequence([...sequence, { key: sequence.at(-1)?.key ?? 'C', varIdx: 0, degreeIdx: -1 }])}
+            >+ Adicionar compasso</button>
           </div>
 
           <div className="w-full" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
