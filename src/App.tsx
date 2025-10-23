@@ -111,6 +111,144 @@ const DRUM_PATTERNS: Record<string, DrumPattern> = {
     kick:  ["k","-","-","-","k","k","-","-","k","-","-","-","k","-","-","-"],
     snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
     hihat: ["h","-","-","h","-","-","h","-","h","-","-","h","-","-","h","-"]
+  },
+  rock2: {
+    label: "Rock Pesado",
+    kick:  ["k","-","k","-","k","-","k","-","k","-","k","-","k","-","k","-"],
+    snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
+    hihat: ["h","h","h","h","h","h","h","h","h","h","h","h","h","h","h","h"]
+  },
+  punk: {
+    label: "Punk Rock",
+    kick:  ["k","k","k","k","k","k","k","k","k","k","k","k","k","k","k","k"],
+    snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
+    hihat: ["h","-","h","-","h","-","h","-","h","-","h","-","h","-","h","-"]
+  },
+  metal: {
+    label: "Metal",
+    kick:  ["k","-","k","k","-","-","k","k","k","-","k","k","-","-","k","k"],
+    snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
+    hihat: ["h","h","h","h","h","h","h","h","h","h","h","h","h","h","h","h"]
+  },
+  hiphop: {
+    label: "Hip Hop",
+    kick:  ["k","-","-","-","-","-","k","-","k","-","-","-","-","-","k","-"],
+    snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
+    hihat: ["h","-","h","h","-","h","h","-","h","-","h","h","-","h","h","-"]
+  },
+  trap: {
+    label: "Trap",
+    kick:  ["k","-","-","-","k","-","-","k","-","-","k","-","-","-","k","-"],
+    snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
+    hihat: ["h","h","h","h","h","h","h","h","h","h","h","h","h","h","h","h"]
+  },
+  dnb: {
+    label: "Drum & Bass",
+    kick:  ["k","-","-","-","-","-","-","-","k","-","-","-","k","-","-","-"],
+    snare: ["-","-","-","-","s","-","-","-","-","-","s","-","-","-","-","-"],
+    hihat: ["h","h","h","h","h","h","h","h","h","h","h","h","h","h","h","h"]
+  },
+  house: {
+    label: "House",
+    kick:  ["k","-","-","-","k","-","-","-","k","-","-","-","k","-","-","-"],
+    snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
+    hihat: ["h","h","h","h","h","h","h","h","h","h","h","h","h","h","h","h"]
+  },
+  techno: {
+    label: "Techno",
+    kick:  ["k","-","-","-","k","-","-","-","k","-","-","-","k","-","-","-"],
+    snare: ["-","-","s","-","-","-","s","-","-","-","s","-","-","-","s","-"],
+    hihat: ["h","h","h","h","h","h","h","h","h","h","h","h","h","h","h","h"]
+  },
+  edm: {
+    label: "EDM",
+    kick:  ["k","-","k","-","k","-","k","-","k","-","k","-","k","-","k","-"],
+    snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
+    hihat: ["o","h","o","h","o","h","o","h","o","h","o","h","o","h","o","h"]
+  },
+  dubstep: {
+    label: "Dubstep",
+    kick:  ["k","-","-","-","-","-","-","-","k","-","-","k","-","-","-","-"],
+    snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
+    hihat: ["h","h","h","h","h","h","h","h","h","h","h","h","h","h","h","h"]
+  },
+  afrobeat: {
+    label: "Afrobeat",
+    kick:  ["k","-","-","k","-","-","k","-","k","-","-","k","-","-","k","-"],
+    snare: ["-","-","s","-","-","s","-","-","-","-","s","-","-","s","-","-"],
+    hihat: ["h","h","h","h","h","h","h","h","h","h","h","h","h","h","h","h"]
+  },
+  rumba: {
+    label: "Rumba",
+    kick:  ["k","-","-","-","k","-","k","-","k","-","-","-","k","-","k","-"],
+    snare: ["-","-","-","s","-","-","-","-","-","-","-","s","-","-","-","-"],
+    hihat: ["h","-","h","-","h","-","h","-","h","-","h","-","h","-","h","-"]
+  },
+  calypso: {
+    label: "Calypso",
+    kick:  ["k","-","-","k","-","-","-","-","k","-","-","k","-","-","-","-"],
+    snare: ["-","-","s","-","-","-","s","-","-","-","s","-","-","-","s","-"],
+    hihat: ["h","h","h","h","h","h","h","h","h","h","h","h","h","h","h","h"]
+  },
+  ska: {
+    label: "Ska",
+    kick:  ["k","-","-","-","k","-","-","-","k","-","-","-","k","-","-","-"],
+    snare: ["-","s","-","s","-","s","-","s","-","s","-","s","-","s","-","s"],
+    hihat: ["-","h","-","h","-","h","-","h","-","h","-","h","-","h","-","h"]
+  },
+  gospel: {
+    label: "Gospel",
+    kick:  ["k","-","-","-","k","-","k","-","k","-","-","-","k","-","-","-"],
+    snare: ["-","-","-","-","s","-","-","s","-","-","-","-","s","-","-","-"],
+    hihat: ["h","-","h","h","-","h","h","-","h","-","h","h","-","h","h","-"]
+  },
+  rnb: {
+    label: "R&B",
+    kick:  ["k","-","-","-","k","-","k","-","k","-","-","-","-","-","k","-"],
+    snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
+    hihat: ["h","h","h","h","h","h","h","h","h","h","h","h","h","h","h","h"]
+  },
+  soul: {
+    label: "Soul",
+    kick:  ["k","-","-","-","k","-","-","-","k","-","-","-","k","-","-","k"],
+    snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
+    hihat: ["h","-","h","-","h","-","h","-","h","-","h","-","h","-","h","-"]
+  },
+  motown: {
+    label: "Motown",
+    kick:  ["k","-","-","-","k","-","k","-","k","-","-","-","k","-","k","-"],
+    snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
+    hihat: ["h","h","h","h","h","h","h","h","h","h","h","h","h","h","h","h"]
+  },
+  waltz: {
+    label: "Valsa 3/4",
+    kick:  ["k","-","-","-","-","-","-","-","-","k","-","-","-","-","-","-"],
+    snare: ["-","-","-","s","-","-","s","-","-","-","-","-","s","-","-","s"],
+    hihat: ["h","-","-","h","-","-","h","-","-","h","-","-","h","-","-","h"]
+  },
+  march: {
+    label: "Marcha",
+    kick:  ["k","-","k","-","k","-","k","-","k","-","k","-","k","-","k","-"],
+    snare: ["-","-","s","-","-","-","s","-","-","-","s","-","-","-","s","-"],
+    hihat: ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"]
+  },
+  tango: {
+    label: "Tango",
+    kick:  ["k","-","k","-","-","-","-","-","k","-","k","-","-","-","-","-"],
+    snare: ["-","-","-","-","s","-","-","-","-","-","-","-","s","-","-","-"],
+    hihat: ["h","-","h","-","h","-","h","-","h","-","h","-","h","-","h","-"]
+  },
+  bolero: {
+    label: "Bolero",
+    kick:  ["k","-","-","-","-","-","k","-","-","-","k","-","-","-","-","-"],
+    snare: ["-","-","s","-","-","-","-","-","s","-","-","-","-","-","s","-"],
+    hihat: ["h","-","h","-","h","-","h","-","h","-","h","-","h","-","h","-"]
+  },
+  flamenco: {
+    label: "Flamenco",
+    kick:  ["k","-","-","k","-","k","-","-","k","-","-","k","-","k","-","-"],
+    snare: ["-","s","-","-","s","-","s","-","-","s","-","-","s","-","s","-"],
+    hihat: ["h","h","h","h","h","h","h","h","h","h","h","h","h","h","h","h"]
   }
 };
 
@@ -892,28 +1030,114 @@ export default function App() {
     if (!bassEnabled) return;
     const idx = stepIdx % 8;
     let noteMidi = rootMidi;
+    let shouldPlay = true;
 
-    if (pattern === "root-fifth") {
-      if (idx === 2 || idx === 6) noteMidi += 7;
-    } else if (pattern === "walking") {
-      if (idx === 1) noteMidi += 2;
-      else if (idx === 2) noteMidi += 4;
-      else if (idx === 3) noteMidi += 5;
-      else if (idx === 4) noteMidi += 7;
-      else if (idx === 5) noteMidi += 5;
-      else if (idx === 6) noteMidi += 4;
-      else if (idx === 7) noteMidi += 2;
-    } else if (pattern === "swing") {
-      if (idx === 0 || idx === 3 || idx === 6) {
-      } else if (idx === 2 || idx === 5) noteMidi += 7;
-      else return;
-    } else if (pattern === "bossa") {
-      if (idx === 0 || idx === 3 || idx === 5) {
-      } else if (idx === 2) noteMidi += 7;
-      else return;
+    switch(pattern) {
+      case "root-fifth":
+        if (idx === 2 || idx === 6) noteMidi += 7;
+        break;
+      case "walking":
+        if (idx === 1) noteMidi += 2;
+        else if (idx === 2) noteMidi += 4;
+        else if (idx === 3) noteMidi += 5;
+        else if (idx === 4) noteMidi += 7;
+        else if (idx === 5) noteMidi += 5;
+        else if (idx === 6) noteMidi += 4;
+        else if (idx === 7) noteMidi += 2;
+        break;
+      case "swing":
+        if (idx === 0 || idx === 3 || idx === 6) {}
+        else if (idx === 2 || idx === 5) noteMidi += 7;
+        else shouldPlay = false;
+        break;
+      case "bossa":
+        if (idx === 0 || idx === 3 || idx === 5) {}
+        else if (idx === 2) noteMidi += 7;
+        else shouldPlay = false;
+        break;
+      case "steady":
+        break;
+      case "octave":
+        if (idx % 2 === 1) noteMidi += 12;
+        break;
+      case "arpeggio":
+        if (idx === 1 || idx === 5) noteMidi += 4;
+        else if (idx === 2 || idx === 6) noteMidi += 7;
+        else if (idx === 3 || idx === 7) noteMidi += 12;
+        break;
+      case "reggae":
+        if (idx === 1 || idx === 3 || idx === 5 || idx === 7) shouldPlay = false;
+        break;
+      case "disco":
+        if (idx % 2 === 1) shouldPlay = false;
+        break;
+      case "funk":
+        if (idx === 2) noteMidi += 7;
+        else if (idx === 4 || idx === 5) shouldPlay = false;
+        break;
+      case "rock":
+        if (idx === 4) noteMidi += 7;
+        break;
+      case "jazz-walk":
+        if (idx === 1) noteMidi += 2;
+        else if (idx === 2) noteMidi += 3;
+        else if (idx === 3) noteMidi += 5;
+        else if (idx === 4) noteMidi += 7;
+        else if (idx === 5) noteMidi += 9;
+        else if (idx === 6) noteMidi += 11;
+        else if (idx === 7) noteMidi += 10;
+        break;
+      case "blues":
+        if (idx === 2) noteMidi -= 2;
+        else if (idx === 4) noteMidi += 7;
+        else if (idx === 6) noteMidi += 5;
+        break;
+      case "latin":
+        if (idx === 1 || idx === 3 || idx === 5 || idx === 7) noteMidi += 7;
+        break;
+      case "country":
+        if (idx === 2 || idx === 6) noteMidi += 5;
+        else if (idx === 4) noteMidi += 7;
+        break;
+      case "metal":
+        if (idx % 2 === 0) {}
+        else shouldPlay = false;
+        break;
+      case "punk":
+        break;
+      case "hiphop":
+        if (idx === 3 || idx === 7) noteMidi += 7;
+        else if (idx === 1 || idx === 5) shouldPlay = false;
+        break;
+      case "trap":
+        if (idx === 0 || idx === 4) {}
+        else if (idx === 2 || idx === 6) noteMidi -= 12;
+        else shouldPlay = false;
+        break;
+      case "dnb":
+        if (idx % 2 === 0) noteMidi += (idx % 4 === 0 ? 0 : 7);
+        else shouldPlay = false;
+        break;
+      case "techno":
+        break;
+      case "house":
+        if (idx % 2 === 1) shouldPlay = false;
+        break;
+      case "dubstep":
+        if (idx === 0 || idx === 4) {}
+        else if (idx === 2 || idx === 6) noteMidi -= 12;
+        else shouldPlay = false;
+        break;
+      case "ska":
+        if (idx % 2 === 0) shouldPlay = false;
+        break;
+      default:
+        break;
     }
 
-    void playMidi(noteMidi - 12, 0, 0.4, 0.8 * bassVolume);
+    if (shouldPlay) {
+      void playMidi(noteMidi - 12, 0, 0.4, 0.8 * bassVolume);
+    }
   };
 
   const playDrumStep = (stepIdx: number) => {
@@ -1215,10 +1439,30 @@ export default function App() {
               🎸 Baixo
             </label>
             <select className="w-full rounded-xl border-2 p-3 mb-3 font-medium" style={{borderColor:'#e2e8f0'}} value={bassPattern} onChange={(e)=>setBassPattern(e.target.value)}>
-              <option value="root-fifth">Fundamental + Quinta</option>
-              <option value="walking">Walking Bass</option>
-              <option value="swing">Swing Jazz</option>
-              <option value="bossa">Bossa Nova</option>
+              <option value="steady">1. Steady (Fundamental)</option>
+              <option value="root-fifth">2. Fundamental + Quinta</option>
+              <option value="octave">3. Oitavas Alternadas</option>
+              <option value="walking">4. Walking Bass Clássico</option>
+              <option value="jazz-walk">5. Walking Jazz Cromático</option>
+              <option value="arpeggio">6. Arpejo Ascendente</option>
+              <option value="swing">7. Swing Jazz</option>
+              <option value="bossa">8. Bossa Nova</option>
+              <option value="reggae">9. Reggae (Batidas 1 e 3)</option>
+              <option value="disco">10. Disco (Batidas Pares)</option>
+              <option value="funk">11. Funk Syncopated</option>
+              <option value="rock">12. Rock Alternado</option>
+              <option value="blues">13. Blues Shuffle</option>
+              <option value="latin">14. Latin/Salsa</option>
+              <option value="country">15. Country</option>
+              <option value="metal">16. Metal (Colcheias)</option>
+              <option value="punk">17. Punk (Contínuo)</option>
+              <option value="hiphop">18. Hip Hop</option>
+              <option value="trap">19. Trap (Sub Bass)</option>
+              <option value="dnb">20. Drum & Bass</option>
+              <option value="techno">21. Techno (Four-on-Floor)</option>
+              <option value="house">22. House</option>
+              <option value="dubstep">23. Dubstep (Wobble)</option>
+              <option value="ska">24. Ska (Upbeat)</option>
             </select>
             <label className="flex items-center gap-2 text-sm mb-3 font-medium">
               <input type="checkbox" className="w-4 h-4" checked={bassEnabled} onChange={e=>setBassEnabled(e.target.checked)} />
