@@ -1346,20 +1346,6 @@ export default function App() {
   /* ===== UI ===== */
   return (
     <div className="min-h-screen w-full" style={{ background: "#1a1a1a", color: "#e0e0e0" }}>
-      {/* Header */}
-      <div style={{ background:"linear-gradient(180deg, #2d2d2d 0%, #242424 100%)", borderBottom:"3px solid #000", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }}>
-        <div className="max-w-7xl mx-auto px-6 py-5">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold tracking-wide" style={{ color: "#ffffff", textShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>
-              <span style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', color: '#f59e0b' }}>Play with me,</span>
-              {' '}
-              <span style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', color: '#ec4899', textShadow: '0 0 12px rgba(236,72,153,0.6)' }}>Kamilly</span>
-            </h1>
-            <p className="text-sm mt-1" style={{ color: "#888" }}>MIXER · ACORDES · SEQUENCIADOR · TUNER</p>
-          </div>
-        </div>
-      </div>
-
       <div className="max-w-7xl mx-auto px-6 py-6 grid gap-6">
         {/* Mixer - Fonte & Padrões */}
         <section className="p-6 rounded-xl" style={{background:'linear-gradient(180deg, #2d2d2d 0%, #242424 100%)', boxShadow:'inset 0 2px 1px rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.6)', border: '2px solid #1a1a1a'}}>
