@@ -639,7 +639,7 @@ function Fretboard({ shape, fingers, barre }: { shape: Shape; fingers?: Fingerin
   const fretY = (fretAbs: number) => (fretAbs - startFret + 1) * fretH - fretH / 2;
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full max-w-[85px] mx-auto">
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full max-w-[120px] sm:max-w-[150px] lg:max-w-[180px] xl:max-w-[200px] mx-auto">
       <defs>
         <filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
           <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.2" />
