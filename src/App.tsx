@@ -291,53 +291,53 @@ function Fretboard({ shape, fingers, barre }: { shape: Shape; fingers?: Fingerin
     return { startFret: s, endFret: e, showNut: s === 1 };
   }, [shape]);
 
-  const width = 220, height = 400, strings = 6;
+  const width = 140, height = 260, strings = 6;
   const fretsCount = endFret - startFret + 1;
-  const margin = 24, innerW = width - margin * 2, innerH = height - margin * 2;
+  const margin = 16, innerW = width - margin * 2, innerH = height - margin * 2;
   const fretH = innerH / fretsCount, stringW = innerW / (strings - 1);
   const dots = [3,5,7,9,12,15];
   const fretY = (fretAbs: number) => (fretAbs - startFret + 1) * fretH - fretH / 2;
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full max-w-xs mx-auto">
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full max-w-[160px] mx-auto">
       <defs>
         <filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
           <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.2" />
         </filter>
       </defs>
-      <rect x={0} y={0} width={width} height={height} rx={18} fill="#fff" filter="url(#cardShadow)" />
+      <rect x={0} y={0} width={width} height={height} rx={12} fill="#fff" filter="url(#cardShadow)" />
       <g transform={`translate(${margin},${margin})`}>
         {Array.from({ length: fretsCount + 1 }).map((_, i) => {
           const y = i * fretH; const fretNumber = startFret + i - 1;
           return (
             <g key={i}>
-              <line x1={0} y1={y} x2={innerW} y2={y} stroke={i===0 && showNut? "#888":"#c9c9c9"} strokeWidth={i===0 && showNut? 6:2} />
+              <line x1={0} y1={y} x2={innerW} y2={y} stroke={i===0 && showNut? "#888":"#c9c9c9"} strokeWidth={i===0 && showNut? 4:1.5} />
               {i>0 && dots.includes(fretNumber) && (
-                <circle cx={innerW/2} cy={y - fretH/2} r={6} fill="#a3a3a3" />
+                <circle cx={innerW/2} cy={y - fretH/2} r={4} fill="#a3a3a3" />
               )}
               {i>0 && fretNumber===12 && (
                 <>
-                  <circle cx={innerW/3} cy={y - fretH/2} r={5} fill="#a3a3a3" />
-                  <circle cx={(innerW/3)*2} cy={y - fretH/2} r={5} fill="#a3a3a3" />
+                  <circle cx={innerW/3} cy={y - fretH/2} r={3} fill="#a3a3a3" />
+                  <circle cx={(innerW/3)*2} cy={y - fretH/2} r={3} fill="#a3a3a3" />
                 </>
               )}
             </g>
           );
         })}
         {Array.from({ length: strings }).map((_, s) => {
-          const x = s * stringW; const sw = 1.5 + (strings - s) * 0.25;
+          const x = s * stringW; const sw = 1 + (strings - s) * 0.2;
           return <line key={s} x1={x} y1={0} x2={x} y2={innerH} stroke="#666" strokeWidth={sw} />;
         })}
         {shape.map((v, s) => {
           const x = s * stringW;
-          if (v === "x") return <text key={`x-${s}`} x={x} y={-8} textAnchor="middle" fill="#dc2626" fontSize={12}>x</text>;
-          if (v === 0)   return <text key={`o-${s}`} x={x} y={-8} textAnchor="middle" fill="#065f46" fontSize={12}>0</text>;
+          if (v === "x") return <text key={`x-${s}`} x={x} y={-6} textAnchor="middle" fill="#dc2626" fontSize={10}>x</text>;
+          if (v === 0)   return <text key={`o-${s}`} x={x} y={-6} textAnchor="middle" fill="#065f46" fontSize={10}>0</text>;
           return null;
         })}
         {barre && (
           <g>
-            <rect x={barre.from*stringW - 9} y={fretY(barre.fret) - 11} width={(barre.to - barre.from)*stringW + 18} height={22} rx={11} fill="#111827" opacity={0.6} />
-            <text x={barre.from*stringW - 14} y={fretY(barre.fret) + 4} textAnchor="middle" fill="#fff" fontSize={10}>{barre.finger}</text>
+            <rect x={barre.from*stringW - 7} y={fretY(barre.fret) - 8} width={(barre.to - barre.from)*stringW + 14} height={16} rx={8} fill="#111827" opacity={0.6} />
+            <text x={barre.from*stringW - 12} y={fretY(barre.fret) + 3} textAnchor="middle" fill="#fff" fontSize={8}>{barre.finger}</text>
           </g>
         )}
         {shape.map((v, s) => {
@@ -345,17 +345,17 @@ function Fretboard({ shape, fingers, barre }: { shape: Shape; fingers?: Fingerin
           const cx = s * stringW; const cy = fretY(v); const finger = fingers?.[s];
           return (
             <g key={`f-${s}`}>
-              <circle cx={cx} cy={cy} r={12} fill="#4f46e5" />
+              <circle cx={cx} cy={cy} r={9} fill="#4f46e5" />
               {finger ? (
-                <text x={cx} y={cy+4} textAnchor="middle" fill="#fff" fontSize={12}>{finger}</text>
+                <text x={cx} y={cy+3} textAnchor="middle" fill="#fff" fontSize={9}>{finger}</text>
               ) : (
-                <circle cx={cx} cy={cy} r={6} fill="#fff" />
+                <circle cx={cx} cy={cy} r={4} fill="#fff" />
               )}
             </g>
           );
         })}
         {!(showNut) && (
-          <text x={-8} y={8} fill="#737373" fontSize={12}>{startFret}fr</text>
+          <text x={-6} y={6} fill="#737373" fontSize={9}>{startFret}fr</text>
         )}
       </g>
     </svg>
