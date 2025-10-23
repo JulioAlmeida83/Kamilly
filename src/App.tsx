@@ -1550,57 +1550,59 @@ export default function App() {
             {isPlayingSingle && <span className="text-xs px-3 py-1 rounded" style={{background:'#10b981', color:'#000', fontWeight:'700', letterSpacing:'1px'}}>PLAYING</span>}
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-6 items-center justify-center">
-            <div className="space-y-4 w-full lg:w-auto lg:min-w-[320px]">
-              <div className="flex gap-3">
-                <div className="flex-1">
-                  <label className="block mb-2 text-center" style={{color:'#999', textTransform:'uppercase', fontSize:'10px', letterSpacing:'1.5px', fontWeight:'700'}}>ACORDE</label>
-                  <select className="w-full rounded border p-3 text-base font-medium" style={{borderColor:'#555', background:'#0d0d0d', color:'#e0e0e0', boxShadow:'inset 0 2px 4px rgba(0,0,0,0.5)'}} value={chordKey} onChange={(e)=>{setChordKey(e.target.value); setVariantIdx(0);}}>
-                    {CHORD_KEYS.map(k => <option key={k} value={k}>{CHORDS[k].name}</option>)}
-                  </select>
+          <div className="max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-center">
+              <div className="space-y-4 max-w-md mx-auto lg:mx-0 w-full">
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <label className="block mb-2 text-center" style={{color:'#999', textTransform:'uppercase', fontSize:'10px', letterSpacing:'1.5px', fontWeight:'700'}}>ACORDE</label>
+                    <select className="w-full rounded border p-3 text-base font-medium" style={{borderColor:'#555', background:'#0d0d0d', color:'#e0e0e0', boxShadow:'inset 0 2px 4px rgba(0,0,0,0.5)'}} value={chordKey} onChange={(e)=>{setChordKey(e.target.value); setVariantIdx(0);}}>
+                      {CHORD_KEYS.map(k => <option key={k} value={k}>{CHORDS[k].name}</option>)}
+                    </select>
+                  </div>
+                  <div className="flex-1">
+                    <label className="block mb-2 text-center" style={{color:'#999', textTransform:'uppercase', fontSize:'10px', letterSpacing:'1.5px', fontWeight:'700'}}>VOICING</label>
+                    <select className="w-full rounded border p-3 font-medium" style={{borderColor:'#555', background:'#0d0d0d', color:'#e0e0e0', boxShadow:'inset 0 2px 4px rgba(0,0,0,0.5)'}} value={variantIdx} onChange={(e)=>setVariantIdx(Number(e.target.value))}>
+                      {CHORDS[chordKey].variants.map((v,i)=> <option key={i} value={i}>{v.label.split(' ')[0]}</option>)}
+                    </select>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <label className="block mb-2 text-center" style={{color:'#999', textTransform:'uppercase', fontSize:'10px', letterSpacing:'1.5px', fontWeight:'700'}}>VOICING</label>
-                  <select className="w-full rounded border p-3 font-medium" style={{borderColor:'#555', background:'#0d0d0d', color:'#e0e0e0', boxShadow:'inset 0 2px 4px rgba(0,0,0,0.5)'}} value={variantIdx} onChange={(e)=>setVariantIdx(Number(e.target.value))}>
-                    {CHORDS[chordKey].variants.map((v,i)=> <option key={i} value={i}>{v.label.split(' ')[0]}</option>)}
-                  </select>
+
+                <div className="flex items-center justify-center gap-2 my-4">
+                  <label className="text-xs flex items-center gap-2" style={{color:'#aaa', textTransform:'uppercase', letterSpacing:'1px'}}>
+                    <input type="checkbox" className="w-3 h-3" checked={loopSingle} onChange={e=>setLoopSingle(e.target.checked)} />
+                    LOOP
+                  </label>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={handlePlaySingle}
+                    disabled={isPlayingSequence}
+                    className="flex-1 px-5 py-3 rounded font-bold text-sm disabled:opacity-50"
+                    style={{background:'linear-gradient(180deg, #10b981 0%, #059669 100%)',color:'#000', boxShadow:'0 2px 8px rgba(16,185,129,.4)', border:'1px solid #10b981', textTransform:'uppercase', letterSpacing:'1px'}}
+                  >
+                    {isPlayingSingle ? 'PLAYING...' : 'PLAY'}
+                  </button>
+                  <button
+                    onClick={handleStopSingle}
+                    disabled={!isPlayingSingle}
+                    className="px-5 py-3 rounded font-bold disabled:opacity-30"
+                    style={{background:'linear-gradient(180deg, #dc2626 0%, #991b1b 100%)',color:'#fff', boxShadow:'0 2px 8px rgba(220,38,38,.4)', border:'1px solid #dc2626', textTransform:'uppercase', letterSpacing:'1px'}}
+                  >
+                    STOP
+                  </button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-center gap-2 my-4">
-                <label className="text-xs flex items-center gap-2" style={{color:'#aaa', textTransform:'uppercase', letterSpacing:'1px'}}>
-                  <input type="checkbox" className="w-3 h-3" checked={loopSingle} onChange={e=>setLoopSingle(e.target.checked)} />
-                  LOOP
-                </label>
+              <div className="flex flex-col items-center justify-center mx-auto lg:mx-0">
+                <div style={{maxWidth: '140px', width: '100%'}}>
+                  <Fretboard shape={currentVoicing.shape} fingers={currentVoicing.fingers} barre={currentVoicing.barre} />
+                </div>
+                <p style={{fontSize:11, textAlign:'center', marginTop:8, color:'#475569'}}>
+                  {CHORDS[chordKey].name} · {CHORDS[chordKey].variants[variantIdx].label}
+                </p>
               </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={handlePlaySingle}
-                  disabled={isPlayingSequence}
-                  className="flex-1 px-5 py-3 rounded font-bold text-sm disabled:opacity-50"
-                  style={{background:'linear-gradient(180deg, #10b981 0%, #059669 100%)',color:'#000', boxShadow:'0 2px 8px rgba(16,185,129,.4)', border:'1px solid #10b981', textTransform:'uppercase', letterSpacing:'1px'}}
-                >
-                  {isPlayingSingle ? 'PLAYING...' : 'PLAY'}
-                </button>
-                <button
-                  onClick={handleStopSingle}
-                  disabled={!isPlayingSingle}
-                  className="px-5 py-3 rounded font-bold disabled:opacity-30"
-                  style={{background:'linear-gradient(180deg, #dc2626 0%, #991b1b 100%)',color:'#fff', boxShadow:'0 2px 8px rgba(220,38,38,.4)', border:'1px solid #dc2626', textTransform:'uppercase', letterSpacing:'1px'}}
-                >
-                  STOP
-                </button>
-              </div>
-            </div>
-
-            <div className="flex flex-col items-center justify-center">
-              <div style={{maxWidth: '140px', width: '100%'}}>
-                <Fretboard shape={currentVoicing.shape} fingers={currentVoicing.fingers} barre={currentVoicing.barre} />
-              </div>
-              <p style={{fontSize:11, textAlign:'center', marginTop:8, color:'#475569'}}>
-                {CHORDS[chordKey].name} · {CHORDS[chordKey].variants[variantIdx].label}
-              </p>
             </div>
           </div>
         </section>
