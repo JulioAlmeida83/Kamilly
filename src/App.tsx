@@ -811,6 +811,9 @@ export default function App() {
   const [drumPatternId, setDrumPatternId] = useState("rock");
   const [drumsEnabled, setDrumsEnabled] = useState(true);
   const [drumVolume, setDrumVolume] = useState(0.7);
+  const [bassEnabled, setBassEnabled] = useState(false);
+  const [bassPattern, setBassPattern] = useState("root-fifth");
+  const [bassVolume, setBassVolume] = useState(0.6);
   const [bpm] = useState(92);
   const [swing] = useState(0.08);
   const [strumMs] = useState(12);
@@ -885,6 +888,34 @@ export default function App() {
   };
 
   // ========== ACORDE INDIVIDUAL ==========
+  const playBassNote = (rootMidi: number, pattern: string, stepIdx: number) => {
+    if (!bassEnabled) return;
+    const idx = stepIdx % 8;
+    let noteMidi = rootMidi;
+
+    if (pattern === "root-fifth") {
+      if (idx === 2 || idx === 6) noteMidi += 7;
+    } else if (pattern === "walking") {
+      if (idx === 1) noteMidi += 2;
+      else if (idx === 2) noteMidi += 4;
+      else if (idx === 3) noteMidi += 5;
+      else if (idx === 4) noteMidi += 7;
+      else if (idx === 5) noteMidi += 5;
+      else if (idx === 6) noteMidi += 4;
+      else if (idx === 7) noteMidi += 2;
+    } else if (pattern === "swing") {
+      if (idx === 0 || idx === 3 || idx === 6) {
+      } else if (idx === 2 || idx === 5) noteMidi += 7;
+      else return;
+    } else if (pattern === "bossa") {
+      if (idx === 0 || idx === 3 || idx === 5) {
+      } else if (idx === 2) noteMidi += 7;
+      else return;
+    }
+
+    void playMidi(noteMidi - 12, 0, 0.4, 0.8 * bassVolume);
+  };
+
   const playDrumStep = (stepIdx: number) => {
     if (!drumsEnabled) return;
     const drumPat = DRUM_PATTERNS[drumPatternId];
@@ -917,6 +948,12 @@ export default function App() {
       if (st !== "-") void playChordStrum(currentVoicing, accMap, st === "D", singleStepIdxRef.current);
 
       playDrumStep(singleStepIdxRef.current * 2);
+
+      const mids = voicingMidis(currentVoicing);
+      if (mids.length > 0) {
+        const rootMidi = findRootMidi(mids, rootName);
+        playBassNote(rootMidi, bassPattern, singleStepIdxRef.current);
+      }
 
       singleStepIdxRef.current += 1;
 
@@ -970,6 +1007,12 @@ export default function App() {
       if (st !== "-") void playChordStrum(voicing, accMap, st === "D", seqStepIdxRef.current);
 
       playDrumStep(seqStepIdxRef.current * 2);
+
+      const mids = voicingMidis(voicing);
+      if (mids.length > 0) {
+        const rootMidi = findRootMidi(mids, rootName);
+        playBassNote(rootMidi, bassPattern, seqStepIdxRef.current);
+      }
 
       seqStepIdxRef.current += 1;
 
@@ -1105,7 +1148,7 @@ export default function App() {
 
       <div className="max-w-7xl mx-auto px-4 py-4 grid gap-6">
         {/* Configurações globais */}
-        <section className="grid lg:grid-cols-4 md:grid-cols-2 gap-4">
+        <section className="grid lg:grid-cols-5 md:grid-cols-2 gap-4">
           <div className="p-5 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
             <label className="block text-sm font-semibold mb-3 flex items-center gap-2">
               🎸 Instrumento
@@ -1166,6 +1209,32 @@ export default function App() {
               <span>Seco</span>
               <span>Ambiente</span>
             </div>
+          </div>
+          <div className="p-5 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
+            <label className="block text-sm font-semibold mb-3 flex items-center gap-2">
+              🎸 Baixo
+            </label>
+            <select className="w-full rounded-xl border-2 p-3 mb-3 font-medium" style={{borderColor:'#e2e8f0'}} value={bassPattern} onChange={(e)=>setBassPattern(e.target.value)}>
+              <option value="root-fifth">Fundamental + Quinta</option>
+              <option value="walking">Walking Bass</option>
+              <option value="swing">Swing Jazz</option>
+              <option value="bossa">Bossa Nova</option>
+            </select>
+            <label className="flex items-center gap-2 text-sm mb-3 font-medium">
+              <input type="checkbox" className="w-4 h-4" checked={bassEnabled} onChange={e=>setBassEnabled(e.target.checked)} />
+              Ativar baixo
+            </label>
+            <label className="block text-sm font-medium mb-2">Volume: {Math.round(bassVolume * 100)}%</label>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={bassVolume}
+              onChange={e=>setBassVolume(parseFloat(e.target.value))}
+              className="w-full h-2"
+              style={{accentColor:'#f59e0b'}}
+            />
           </div>
         </section>
 
