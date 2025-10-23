@@ -1346,13 +1346,13 @@ export default function App() {
   /* ===== UI ===== */
   return (
     <div className="min-h-screen w-full" style={{ background: "#1a1a1a", color: "#e0e0e0" }}>
-      <div className="max-w-7xl mx-auto px-6 py-6 grid gap-6">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 grid gap-4 sm:gap-6" style={{maxWidth: "100%"}}>
         {/* Mixer - Fonte & Padrões */}
-        <section className="p-6 rounded-xl" style={{background:'linear-gradient(180deg, #2d2d2d 0%, #242424 100%)', boxShadow:'inset 0 2px 1px rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.6)', border: '2px solid #1a1a1a'}}>
+        <section className="p-4 sm:p-6 rounded-xl" style={{background:'linear-gradient(180deg, #2d2d2d 0%, #242424 100%)', boxShadow:'inset 0 2px 1px rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.6)', border: '2px solid #1a1a1a'}}>
           <div className="mb-2 pb-1" style={{borderBottom: '1px solid #333'}}>
             <h3 className="text-[9px] font-bold tracking-wider" style={{color:'#888', textTransform:'uppercase', letterSpacing:'1.5px'}}>SOURCE & PATTERNS</h3>
           </div>
-          <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             <div>
               <label className="block mb-3 pb-2 text-center" style={{color:'#999', textTransform:'uppercase', fontSize:'10px', letterSpacing:'1.5px', fontWeight:'700', borderBottom:'2px solid #f59e0b'}}>
                 INSTRUMENTO
@@ -1427,11 +1427,11 @@ export default function App() {
         </section>
 
         {/* Mixer - Faders */}
-        <section className="p-6 rounded-xl" style={{background:'linear-gradient(180deg, #2d2d2d 0%, #242424 100%)', boxShadow:'inset 0 2px 1px rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.6)', border: '2px solid #1a1a1a'}}>
+        <section className="p-4 sm:p-6 rounded-xl" style={{background:'linear-gradient(180deg, #2d2d2d 0%, #242424 100%)', boxShadow:'inset 0 2px 1px rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.6)', border: '2px solid #1a1a1a'}}>
           <div className="mb-4 pb-3" style={{borderBottom: '1px solid #333'}}>
             <h3 className="text-xs font-bold tracking-wider" style={{color:'#888', textTransform:'uppercase', letterSpacing:'2px'}}>FADERS & CONTROLS</h3>
           </div>
-          <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 sm:gap-8">
             <div className="flex flex-col items-center">
               <label className="block mb-3 pb-2 text-center" style={{color:'#999', textTransform:'uppercase', fontSize:'10px', letterSpacing:'1.5px', fontWeight:'700', borderBottom:'2px solid #f59e0b'}}>
                 INST VOLUME
@@ -1513,11 +1513,11 @@ export default function App() {
         </section>
 
         {/* Mixer - FX */}
-        <section className="p-6 rounded-xl" style={{background:'linear-gradient(180deg, #2d2d2d 0%, #242424 100%)', boxShadow:'inset 0 2px 1px rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.6)', border: '2px solid #1a1a1a'}}>
+        <section className="p-4 sm:p-6 rounded-xl" style={{background:'linear-gradient(180deg, #2d2d2d 0%, #242424 100%)', boxShadow:'inset 0 2px 1px rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.6)', border: '2px solid #1a1a1a'}}>
           <div className="mb-4 pb-3" style={{borderBottom: '1px solid #333'}}>
             <h3 className="text-xs font-bold tracking-wider" style={{color:'#888', textTransform:'uppercase', letterSpacing:'2px'}}>EFFECTS</h3>
           </div>
-          <div className="grid lg:grid-cols-1 gap-8">
+          <div className="grid grid-cols-1 gap-6 sm:gap-8">
             <div className="flex flex-col items-center">
               <label className="block mb-3 pb-2 text-center" style={{color:'#999', textTransform:'uppercase', fontSize:'10px', letterSpacing:'1.5px', fontWeight:'700', borderBottom:'2px solid #06b6d4'}}>
                 REVERB MIX
@@ -1544,13 +1544,13 @@ export default function App() {
         </section>
 
         {/* ACORDE INDIVIDUAL */}
-        <section className="p-6 rounded-lg" style={{background:'linear-gradient(180deg, #2d2d2d 0%, #242424 100%)', boxShadow:'inset 0 2px 1px rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.6)', border: isPlayingSingle ? '3px solid #10b981' : '2px solid #1a1a1a'}}>
+        <section className="p-4 sm:p-6 rounded-lg" style={{background:'linear-gradient(180deg, #2d2d2d 0%, #242424 100%)', boxShadow:'inset 0 2px 1px rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.6)', border: isPlayingSingle ? '3px solid #10b981' : '2px solid #1a1a1a'}}>
           <div className="mb-4 pb-3 flex items-center justify-between" style={{borderBottom: '1px solid #333'}}>
             <h3 className="text-xs font-bold tracking-wider" style={{color:'#888', textTransform:'uppercase', letterSpacing:'2px'}}>SINGLE CHORD</h3>
             {isPlayingSingle && <span className="text-xs px-3 py-1 rounded" style={{background:'#10b981', color:'#000', fontWeight:'700', letterSpacing:'1px'}}>PLAYING</span>}
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             <div className="space-y-4">
               <div className="flex gap-3">
                 <div className="flex-1">
@@ -1751,7 +1751,7 @@ export default function App() {
         </section>
 
         {/* Afinadores */}
-        <section className="grid lg:grid-cols-2 gap-6">
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Referência de tom */}
           <div className="p-4 rounded-2xl" style={{background:'linear-gradient(180deg, #353535 0%, #2a2a2a 100%)', boxShadow:'inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 8px rgba(0,0,0,0.5)', border: '1px solid #1a1a1a'}}>
             <div className="flex flex-wrap items-center gap-2">
