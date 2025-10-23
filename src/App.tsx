@@ -1594,7 +1594,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center justify-center ml-8">
               <div style={{maxWidth: '140px', width: '100%'}}>
                 <Fretboard shape={currentVoicing.shape} fingers={currentVoicing.fingers} barre={currentVoicing.barre} />
               </div>
