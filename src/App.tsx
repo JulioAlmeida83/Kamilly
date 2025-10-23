@@ -1827,7 +1827,7 @@ export default function App() {
             </div>
             {/* needle */}
             <div className="mt-3 flex items-center justify-center">
-              <svg width="220" height="110" viewBox="0 0 220 110">
+              <svg width="100%" height="90" viewBox="0 0 220 90" preserveAspectRatio="xMidYMid meet">
                 <defs>
                   <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stopColor="#ef4444"/>
@@ -1835,12 +1835,14 @@ export default function App() {
                     <stop offset="100%" stopColor="#ef4444"/>
                   </linearGradient>
                 </defs>
-                <path d="M10,100 A100,100 0 0,1 210,100" fill="none" stroke="url(#g)" strokeWidth="10"/>
-                <g transform={`translate(110,100) rotate(${needleRot})`}>
-                  <line x1={0} y1={0} x2={0} y2={-80} stroke="#0f172a" strokeWidth={3}/>
-                  <circle cx={0} cy={0} r={5} fill="#0f172a"/>
+                <path d="M10,80 A100,100 0 0,1 210,80" fill="none" stroke="url(#g)" strokeWidth="8"/>
+                <g transform={`translate(110,80) rotate(${needleRot})`}>
+                  <line x1={0} y1={0} x2={0} y2={-70} stroke="#fff" strokeWidth={3}/>
+                  <circle cx={0} cy={0} r={5} fill="#fff"/>
                 </g>
-                <text x={110} y={108} textAnchor="middle" fontSize={10} fill="#64748b">-50¢                                                0¢                                                +50¢</text>
+                <text x={20} y={88} fontSize={9} fill="#888">-50¢</text>
+                <text x={105} y={88} textAnchor="middle" fontSize={9} fill="#888">0¢</text>
+                <text x={195} y={88} textAnchor="end" fontSize={9} fill="#888">+50¢</text>
               </svg>
             </div>
             <div className="text-xs text-gray-500 text-center">Dica: use fones e um local silencioso para melhor leitura.</div>
