@@ -1550,8 +1550,8 @@ export default function App() {
             {isPlayingSingle && <span className="text-xs px-3 py-1 rounded" style={{background:'#10b981', color:'#000', fontWeight:'700', letterSpacing:'1px'}}>PLAYING</span>}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            <div className="space-y-4">
+          <div className="flex flex-col lg:flex-row gap-6 items-center justify-center">
+            <div className="space-y-4 w-full lg:w-auto lg:min-w-[320px]">
               <div className="flex gap-3">
                 <div className="flex-1">
                   <label className="block mb-2 text-center" style={{color:'#999', textTransform:'uppercase', fontSize:'10px', letterSpacing:'1.5px', fontWeight:'700'}}>ACORDE</label>
@@ -1594,7 +1594,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="flex flex-col items-center justify-center ml-8">
+            <div className="flex flex-col items-center justify-center">
               <div style={{maxWidth: '140px', width: '100%'}}>
                 <Fretboard shape={currentVoicing.shape} fingers={currentVoicing.fingers} barre={currentVoicing.barre} />
               </div>
