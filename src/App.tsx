@@ -439,26 +439,105 @@ function parseChordSymbol(sym: string): { root: string; qual: string } {
   return { root, qual };
 }
 
-// Constrói sequência I, ii, iii, IV, V, IV, vii° no tom maior escolhido
-const DEGREE_SEMIS = [0,2,4,5,7,5,11];
-const DEGREE_QUALS: (""|"m"|"dim")[] = ["","m","m","","","", "dim"]; // I ii iii IV V (IV) vii°
-const NATURALS_SHARP = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"]; // sustenidos
+function getChordDisplaySymbol(key: string): string {
+  const p = parseChordSymbol(key);
+  let d = p.root;
+  if (key.includes("maj7")) d += "maj7";
+  else if (key.includes("m7")) d += "m7";
+  else if (key.endsWith("7")) d += "7";
+  else if (key.endsWith("m")) d += "m";
+  else if (key.includes("dim")) d += "°";
+  return d;
+}
+
+const NATURALS_SHARP = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const toPc = (n: string) => toIndex(n);
 const nameForPc = (pc: number) => NATURALS_SHARP[(pc%12+12)%12];
 
-function buildDefaultSeqSymbols(tonicRoot: string) {
+type DegreeType = "" | "m" | "7" | "m7" | "maj7" | "dim";
+type ProgressionDegree = { semitones: number; quality: DegreeType; alternatives?: DegreeType[] };
+
+const PROGRESSIONS: Record<string, { name: string; degrees: ProgressionDegree[] }> = {
+  "I-IV-V": {
+    name: "I - IV - V (Rock básico)",
+    degrees: [
+      { semitones: 0, quality: "", alternatives: ["7", "maj7"] },
+      { semitones: 5, quality: "", alternatives: ["7", "maj7"] },
+      { semitones: 7, quality: "", alternatives: ["7"] },
+    ]
+  },
+  "I-V-vi-IV": {
+    name: "I - V - vi - IV (Pop)",
+    degrees: [
+      { semitones: 0, quality: "", alternatives: ["maj7"] },
+      { semitones: 7, quality: "", alternatives: ["7"] },
+      { semitones: 9, quality: "m", alternatives: ["m7"] },
+      { semitones: 5, quality: "", alternatives: ["maj7"] },
+    ]
+  },
+  "ii-V-I": {
+    name: "ii - V - I (Jazz)",
+    degrees: [
+      { semitones: 2, quality: "m7", alternatives: ["m"] },
+      { semitones: 7, quality: "7", alternatives: [""] },
+      { semitones: 0, quality: "maj7", alternatives: [""] },
+    ]
+  },
+  "I-vi-IV-V": {
+    name: "I - vi - IV - V (Anos 50)",
+    degrees: [
+      { semitones: 0, quality: "", alternatives: ["maj7"] },
+      { semitones: 9, quality: "m", alternatives: ["m7"] },
+      { semitones: 5, quality: "", alternatives: ["maj7"] },
+      { semitones: 7, quality: "", alternatives: ["7"] },
+    ]
+  },
+  "I-ii-iii-IV-V-vi-vii": {
+    name: "Escala harmônica completa",
+    degrees: [
+      { semitones: 0, quality: "", alternatives: ["maj7"] },
+      { semitones: 2, quality: "m", alternatives: ["m7"] },
+      { semitones: 4, quality: "m", alternatives: ["m7"] },
+      { semitones: 5, quality: "", alternatives: ["maj7"] },
+      { semitones: 7, quality: "", alternatives: ["7"] },
+      { semitones: 9, quality: "m", alternatives: ["m7"] },
+      { semitones: 11, quality: "dim", alternatives: ["m7"] },
+    ]
+  },
+  "I-IV-I-V": {
+    name: "I - IV - I - V (Blues)",
+    degrees: [
+      { semitones: 0, quality: "7", alternatives: [""] },
+      { semitones: 5, quality: "7", alternatives: [""] },
+      { semitones: 0, quality: "7", alternatives: [""] },
+      { semitones: 7, quality: "7", alternatives: [""] },
+    ]
+  },
+  "vi-IV-I-V": {
+    name: "vi - IV - I - V (Emotional)",
+    degrees: [
+      { semitones: 9, quality: "m", alternatives: ["m7"] },
+      { semitones: 5, quality: "", alternatives: ["maj7"] },
+      { semitones: 0, quality: "", alternatives: ["maj7"] },
+      { semitones: 7, quality: "", alternatives: ["7"] },
+    ]
+  },
+};
+
+function buildSequenceFromProgression(tonicRoot: string, progressionKey: string) {
+  const prog = PROGRESSIONS[progressionKey];
+  if (!prog) return [];
   const base = toPc(tonicRoot);
-  const out: string[] = [];
-  for (let i=0;i<DEGREE_SEMIS.length;i++) {
-    const sem = DEGREE_SEMIS[i];
-    const qual = DEGREE_QUALS[Math.min(i, DEGREE_QUALS.length-1)];
-    let name = nameForPc(base + sem) + (qual === "" ? "" : (qual === "dim" ? "dim" : "m"));
-    if (i===5) { // repetir IV grau como maior
-      name = nameForPc(base + 5);
-    }
-    out.push(name);
-  }
-  return out;
+  return prog.degrees.map(deg => {
+    const root = nameForPc(base + deg.semitones);
+    let symbol = root;
+    if (deg.quality === "m") symbol += "m";
+    else if (deg.quality === "7") symbol += "7";
+    else if (deg.quality === "m7") symbol += "m7";
+    else if (deg.quality === "maj7") symbol += "maj7";
+    else if (deg.quality === "dim") symbol += "dim";
+    return symbol;
+  });
 }
 
 function mapSymbolToDictKey(sym: string): string {
@@ -519,13 +598,18 @@ export default function App() {
   const [nowKey, setNowKey] = useState<string | null>(null);
   const [nowVarIdx, setNowVarIdx] = useState<number>(0);
 
+  /* ===== Tonalidade e Progressão ===== */
+  const [key, setKey] = useState("C");
+  const [progression, setProgression] = useState("I-V-vi-IV");
+
   /* ===== Sequência (dinâmica) ===== */
-  type SeqItem = { key: string; varIdx: number };
-  const initialSeqSymbols = buildDefaultSeqSymbols(parseChordSymbol("C").root);
-  const initialSeq: SeqItem[] = initialSeqSymbols.map(sym => ({ key: mapSymbolToDictKey(sym), varIdx: 0 }));
+  type SeqItem = { key: string; varIdx: number; degreeIdx: number };
+  const initialSeqSymbols = buildSequenceFromProgression("C", "I-V-vi-IV");
+  const initialSeq: SeqItem[] = initialSeqSymbols.map((sym, i) => ({ key: mapSymbolToDictKey(sym), varIdx: 0, degreeIdx: i }));
   const [sequence, setSequence] = useState<SeqItem[]>(initialSeq);
   const [currentBar, setCurrentBar] = useState<number>(-1);
   const [loop, setLoop] = useState<boolean>(true);
+  const [isPlayingSequence, setIsPlayingSequence] = useState(false);
 
   const pattern = useMemo(() => PATTERNS.find(p => p.id === patternId)!, [patternId]);
   const currentVoicing = CHORDS[chordKey].variants[Math.min(variantIdx, CHORDS[chordKey].variants.length-1)];
@@ -605,9 +689,79 @@ export default function App() {
     }, stepMs);
   };
 
-  const handlePlaySingle = async () => { await startAudio(); barIdxRef.current = 0; setNowKey(chordKey); setNowVarIdx(variantIdx); setCurrentBar(-1); await playBar(currentVoicing, chordKey, variantIdx); };
-  const handlePlaySequence = async () => { await startAudio(); barIdxRef.current = 0; const first = sequence[0]; setNowKey(first.key); setNowVarIdx(first.varIdx); setCurrentBar(0); const v = CHORDS[first.key].variants[Math.min(first.varIdx, CHORDS[first.key].variants.length-1)]; await playBar(v, first.key, first.varIdx); };
-  const handleStop = () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } setNowKey(null); setCurrentBar(-1); };
+  const handlePlaySingle = async () => {
+    await startAudio();
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    barIdxRef.current = 0;
+    setNowKey(chordKey);
+    setNowVarIdx(variantIdx);
+    setCurrentBar(-1);
+    setIsPlayingSequence(false);
+    await playBar(currentVoicing, chordKey, variantIdx);
+  };
+
+  const handlePlaySequence = async () => {
+    await startAudio();
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    barIdxRef.current = 0;
+    const first = sequence[0];
+    setNowKey(first.key);
+    setNowVarIdx(first.varIdx);
+    setCurrentBar(0);
+    setIsPlayingSequence(true);
+    const v = CHORDS[first.key].variants[Math.min(first.varIdx, CHORDS[first.key].variants.length-1)];
+    await playBar(v, first.key, first.varIdx);
+  };
+
+  const handleStop = () => {
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    setNowKey(null);
+    setCurrentBar(-1);
+    setIsPlayingSequence(false);
+  };
+
+  const handleKeyChange = (newKey: string) => {
+    setKey(newKey);
+    const symbols = buildSequenceFromProgression(newKey, progression);
+    setSequence(symbols.map((sym, i) => ({ key: mapSymbolToDictKey(sym), varIdx: 0, degreeIdx: i })));
+  };
+
+  const handleProgressionChange = (newProg: string) => {
+    setProgression(newProg);
+    const symbols = buildSequenceFromProgression(key, newProg);
+    setSequence(symbols.map((sym, i) => ({ key: mapSymbolToDictKey(sym), varIdx: 0, degreeIdx: i })));
+  };
+
+  const getAlternativesForDegree = (degreeIdx: number): string[] => {
+    const prog = PROGRESSIONS[progression];
+    if (!prog || degreeIdx >= prog.degrees.length) return [];
+    const deg = prog.degrees[degreeIdx];
+    const base = toPc(key);
+    const root = nameForPc(base + deg.semitones);
+    const alternatives: string[] = [];
+
+    let mainSymbol = root;
+    if (deg.quality === "m") mainSymbol += "m";
+    else if (deg.quality === "7") mainSymbol += "7";
+    else if (deg.quality === "m7") mainSymbol += "m7";
+    else if (deg.quality === "maj7") mainSymbol += "maj7";
+    else if (deg.quality === "dim") mainSymbol += "dim";
+    alternatives.push(mainSymbol);
+
+    if (deg.alternatives) {
+      deg.alternatives.forEach(alt => {
+        let symbol = root;
+        if (alt === "m") symbol += "m";
+        else if (alt === "7") symbol += "7";
+        else if (alt === "m7") symbol += "m7";
+        else if (alt === "maj7") symbol += "maj7";
+        else if (alt === "dim") symbol += "dim";
+        alternatives.push(symbol);
+      });
+    }
+
+    return alternatives.filter(sym => CHORDS[mapSymbolToDictKey(sym)]);
+  };
 
   // Preview arpejado ao trocar voicing (parado)
   useEffect(() => {
@@ -629,13 +783,13 @@ export default function App() {
     <div className="min-h-screen w-full" style={{ background: "linear-gradient(135deg,#f8fafc,#eef2ff)", color: "#0f172a" }}>
       {/* Header sticky */}
       <div style={{ position:"sticky", top:0, zIndex:20, backdropFilter:"blur(8px)", background:"linear-gradient(135deg,rgba(255,255,255,.85),rgba(238,242,255,.85))", borderBottom:"1px solid #e5e7eb" }}>
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-baseline gap-3">
             <h1 className="text-xl md:text-2xl font-bold tracking-tight">Kamilly Play</h1>
             <span className="text-xs md:text-sm text-slate-600">Acordes · Ritmos · Sequência · Afinadores</span>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={handlePlaySingle} className="px-3 py-2 rounded-xl" style={{background:'#4f46e5',color:'#fff', boxShadow:'0 2px 6px rgba(79,70,229,.3)'}}>▶️ Tocar</button>
+            <button onClick={handlePlaySingle} disabled={isPlayingSequence} className="px-3 py-2 rounded-xl disabled:opacity-50" style={{background:'#4f46e5',color:'#fff', boxShadow:'0 2px 6px rgba(79,70,229,.3)'}}>▶️ Acorde</button>
             <button onClick={handlePlaySequence} className="px-3 py-2 rounded-xl" style={{background:'#16a34a',color:'#fff', boxShadow:'0 2px 6px rgba(22,163,74,.3)'}}>🎼 Sequência</button>
             <button onClick={handleStop} className="px-3 py-2 rounded-xl" style={{background:'#dc2626',color:'#fff'}}>⏹️</button>
           </div>
@@ -689,48 +843,41 @@ export default function App() {
           </div>
         </section>
 
-        {/* Sequência linear (dinâmica) */}
+        {/* Sequência de acordes por tonalidade */}
         <section className="space-y-3 p-4 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
-          <div className="text-sm font-medium flex items-center gap-2 flex-wrap">
-            <span>Sequência (tom maior) — I · ii · iii · IV · V · IV · vii°</span>
-            <div className="ml-auto flex gap-2">
-              <button
-                className="px-3 py-1.5 rounded-xl text-xs"
-                style={{background:'#e2e8f0'}}
-                onClick={()=>{
-                  const tonic = parseChordSymbol(chordKey).root;
-                  const syms = buildDefaultSeqSymbols(tonic);
-                  const seq = syms.map(sym => ({ key: mapSymbolToDictKey(sym), varIdx: 0 }));
-                  setSequence(seq);
-                }}
-              >Preencher (tom atual)</button>
-              <button
-                className="px-3 py-1.5 rounded-xl text-xs"
-                style={{background:'#4f46e5', color:'#fff'}}
-                onClick={async()=>{
-                  const tonic = parseChordSymbol(chordKey).root;
-                  const syms = buildDefaultSeqSymbols(tonic);
-                  const seq = syms.map(sym => ({ key: mapSymbolToDictKey(sym), varIdx: 0 }));
-                  setSequence(seq);
-                  // dá um tick pro state aplicar antes de tocar
-                  await new Promise(r=>setTimeout(r,50));
-                  await handlePlaySequence();
-                }}
-              >Preencher + Tocar</button>
-              <label className="text-xs flex items-center gap-2"><input type="checkbox" checked={loop} onChange={e=>setLoop(e.target.checked)} /> Loop</label>
+          <div>
+            <div className="text-sm font-medium">Sequência de Acordes</div>
+            <p className="text-xs text-slate-500 mt-1">Escolha uma tonalidade e progressão. Os acordes se ajustam automaticamente. Use alternativas para variar o som.</p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium mb-1">Tonalidade</label>
+              <select className="w-full rounded-xl border p-2" value={key} onChange={(e)=>handleKeyChange(e.target.value)}>
+                {["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"].map(k => <option key={k} value={k}>{k}</option>)}
+              </select>
             </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">Progressão (preset)</label>
+              <select className="w-full rounded-xl border p-2" value={progression} onChange={(e)=>handleProgressionChange(e.target.value)}>
+                {Object.entries(PROGRESSIONS).map(([k, v]) => <option key={k} value={k}>{v.name}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <label className="text-xs flex items-center gap-2"><input type="checkbox" checked={loop} onChange={e=>setLoop(e.target.checked)} /> Loop</label>
+            <button
+              className="ml-auto px-3 py-1.5 rounded-xl text-xs"
+              style={{background:'#4f46e5', color:'#fff'}}
+              onClick={()=>setSequence([...sequence, { key: sequence.at(-1)?.key ?? 'C', varIdx: 0, degreeIdx: -1 }])}
+            >+ Adicionar compasso</button>
           </div>
 
           {/* faixa de roots sincronizada */}
           <div className="flex gap-2 flex-wrap items-center text-xs">
             {sequence.map((it, idx) => {
-              const p = parseChordSymbol(it.key);
-              let display = p.root;
-              if (it.key.includes("maj7")) display += "maj7";
-              else if (it.key.includes("m7")) display += "m7";
-              else if (it.key.endsWith("7")) display += "7";
-              else if (it.key.endsWith("m")) display += "m";
-              else if (it.key.includes("dim")) display += "°";
+              const display = getChordDisplaySymbol(it.key);
               const active = currentBar===idx;
               return (
                 <span key={idx} className="px-2 py-1 rounded-full" style={{background: active? '#4f46e5' : '#e2e8f0', color: active? '#fff' : '#0f172a'}}>
@@ -742,35 +889,62 @@ export default function App() {
 
           <div className="w-full" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
             <div className="flex gap-2 min-w-full" style={{ paddingBottom: 8 }}>
-              {sequence.map((it, idx) => (
-                <div key={idx} className="rounded-xl border" style={{ minWidth: 220, padding: 10, background: currentBar===idx? '#e0e7ff' : 'rgba(255,255,255,.9)', borderColor: currentBar===idx? '#4f46e5' : '#e5e7eb', boxShadow: currentBar===idx? '0 2px 8px rgba(79,70,229,.25)' : 'none' }}>
-                  <div className="text-[11px] text-neutral-600 mb-2 flex items-center justify-between">
-                    <span>{idx + 1}º compasso</span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px]" style={{background:'#f1f5f9'}}>
-                      {(() => {
-                        const p = parseChordSymbol(it.key);
-                        let d = p.root;
-                        if (it.key.includes("maj7")) d += "maj7";
-                        else if (it.key.includes("m7")) d += "m7";
-                        else if (it.key.endsWith("7")) d += "7";
-                        else if (it.key.endsWith("m")) d += "m";
-                        else if (it.key.includes("dim")) d += "°";
-                        return d;
-                      })()}
-                    </span>
+              {sequence.map((it, idx) => {
+                const alternatives = it.degreeIdx >= 0 ? getAlternativesForDegree(it.degreeIdx) : [];
+                const hasAlternatives = alternatives.length > 1;
+
+                return (
+                  <div key={idx} className="rounded-xl border" style={{ minWidth: 240, padding: 10, background: currentBar===idx? '#e0e7ff' : 'rgba(255,255,255,.9)', borderColor: currentBar===idx? '#4f46e5' : '#e5e7eb', boxShadow: currentBar===idx? '0 2px 8px rgba(79,70,229,.25)' : 'none' }}>
+                    <div className="text-[11px] text-neutral-600 mb-2 flex items-center justify-between">
+                      <span>{idx + 1}º compasso</span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px]" style={{background:'#f1f5f9'}}>
+                        {getChordDisplaySymbol(it.key)}
+                      </span>
+                    </div>
+
+                    {hasAlternatives && (
+                      <div className="mb-2">
+                        <label className="text-[10px] text-neutral-500 block mb-1">Alternativas</label>
+                        <div className="flex gap-1 flex-wrap">
+                          {alternatives.map((alt, altIdx) => {
+                            const altKey = mapSymbolToDictKey(alt);
+                            const isSelected = altKey === it.key;
+                            return (
+                              <button
+                                key={altIdx}
+                                className="px-2 py-0.5 rounded text-xs"
+                                style={{
+                                  background: isSelected ? '#4f46e5' : '#e2e8f0',
+                                  color: isSelected ? '#fff' : '#0f172a'
+                                }}
+                                onClick={() => {
+                                  const copy = [...sequence];
+                                  copy[idx] = { ...copy[idx], key: altKey };
+                                  setSequence(copy);
+                                }}
+                              >
+                                {alt}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-2">
+                      {!hasAlternatives && (
+                        <select className="flex-1 text-sm" value={it.key} onChange={(e)=>{ const v = e.target.value; const copy=[...sequence]; copy[idx] = { ...copy[idx], key:v }; setSequence(copy); }}>
+                          {CHORD_KEYS.map(k=> <option key={k} value={k}>{k}</option>)}
+                        </select>
+                      )}
+                      <select className={`${hasAlternatives ? 'flex-1' : 'w-[110px]'} text-sm`} value={it.varIdx} onChange={(e)=>{ const v = Number(e.target.value); const copy=[...sequence]; copy[idx] = { ...copy[idx], varIdx:v }; setSequence(copy); }}>
+                        {CHORDS[(sequence[idx].key in CHORDS ? sequence[idx].key : "C") as keyof typeof CHORDS].variants.map((v,i)=> <option key={i} value={i}>{v.label.split(' ')[0]}</option>)}
+                      </select>
+                      <button className="text-xs px-2 py-1 rounded" style={{background:'#fee2e2'}} onClick={()=>{ const copy=[...sequence]; copy.splice(idx,1); setSequence(copy.length?copy:[{key:'C',varIdx:0, degreeIdx: 0}]); }}>−</button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <select className="flex-1 text-sm" value={it.key} onChange={(e)=>{ const v = e.target.value; const copy=[...sequence]; copy[idx] = { ...copy[idx], key:v }; setSequence(copy); }}>
-                      {CHORD_KEYS.map(k=> <option key={k} value={k}>{k}</option>)}
-                    </select>
-                    <select className="w-[110px] text-sm" value={it.varIdx} onChange={(e)=>{ const v = Number(e.target.value); const copy=[...sequence]; copy[idx] = { ...copy[idx], varIdx:v }; setSequence(copy); }}>
-                      {CHORDS[(sequence[idx].key in CHORDS ? sequence[idx].key : "C") as keyof typeof CHORDS].variants.map((v,i)=> <option key={i} value={i}>{v.label}</option>)}
-                    </select>
-                    <button className="text-xs px-2 py-1 rounded" style={{background:'#fee2e2'}} onClick={()=>{ const copy=[...sequence]; copy.splice(idx,1); setSequence(copy.length?copy:[{key:'C',varIdx:0}]); }}>−</button>
-                  </div>
-                </div>
-              ))}
-              <button className="px-3 py-2 rounded-xl self-start" style={{background:'#e2e8f0'}} onClick={()=> setSequence([...sequence, { key: sequence.at(-1)?.key ?? 'C', varIdx: 0 }])}>+ Adicionar compasso</button>
+                );
+              })}
             </div>
           </div>
         </section>
