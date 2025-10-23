@@ -1136,7 +1136,7 @@ export default function App() {
     }
 
     if (shouldPlay) {
-      void playMidi(noteMidi - 12, 0, 0.4, 0.8 * bassVolume);
+      void playMidi(noteMidi - 12, 0, 0.5, 1.2 * bassVolume);
     }
   };
 
