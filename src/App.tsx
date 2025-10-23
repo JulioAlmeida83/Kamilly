@@ -242,7 +242,8 @@ function useSF(instrumentName: InstrumentName) {
 
   const ensure = async () => {
     if (!ctxRef.current) {
-      ctxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ latencyHint: "interactive" });
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      ctxRef.current = new AudioCtx({ latencyHint: "interactive" });
     }
     if (ctxRef.current.state !== "running") await ctxRef.current.resume();
     if (!instRef.current && !loadingRef.current) {
@@ -395,7 +396,10 @@ function useChromaticTuner() {
 
   const start = async () => {
     if (running) return; setRunning(true);
-    if (!ctxRef.current) ctxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    if (!ctxRef.current) {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      ctxRef.current = new AudioCtx();
+    }
     const ctx = ctxRef.current;
     const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation:false, noiseSuppression:false, autoGainControl:false } });
     const src = ctx.createMediaStreamSource(stream); srcRef.current = src;
