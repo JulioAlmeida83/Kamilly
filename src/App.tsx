@@ -1341,7 +1341,6 @@ export default function App() {
   /* ===== Afinador Cromático ===== */
   const tuner = useChromaticTuner();
   const centsClamped = Math.max(-50, Math.min(50, tuner.cents));
-  const needleRot = (centsClamped / 50) * 40; // ±40°
 
   /* ===== UI ===== */
   return (
@@ -1825,25 +1824,23 @@ export default function App() {
                 <div className="text-xl font-semibold" style={{color: Math.abs(tuner.cents) < 5 ? '#10b981' : '#ef4444'}}>{tuner.freq? `${tuner.cents>0?'+':''}${tuner.cents}` : '—'}</div>
               </div>
             </div>
-            {/* needle */}
-            <div className="mt-3 flex items-center justify-center">
-              <svg width="100%" height="90" viewBox="0 0 220 90" preserveAspectRatio="xMidYMid meet">
-                <defs>
-                  <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#ef4444"/>
-                    <stop offset="50%" stopColor="#22c55e"/>
-                    <stop offset="100%" stopColor="#ef4444"/>
-                  </linearGradient>
-                </defs>
-                <path d="M10,80 A100,100 0 0,1 210,80" fill="none" stroke="url(#g)" strokeWidth="8"/>
-                <g transform={`translate(110,80) rotate(${needleRot})`}>
-                  <line x1={0} y1={0} x2={0} y2={-70} stroke="#fff" strokeWidth={3}/>
-                  <circle cx={0} cy={0} r={5} fill="#fff"/>
-                </g>
-                <text x={20} y={88} fontSize={9} fill="#888">-50¢</text>
-                <text x={105} y={88} textAnchor="middle" fontSize={9} fill="#888">0¢</text>
-                <text x={195} y={88} textAnchor="end" fontSize={9} fill="#888">+50¢</text>
-              </svg>
+            {/* tuner bar */}
+            <div className="mt-4 px-4">
+              <div className="relative h-12 rounded" style={{background:'linear-gradient(90deg, #ef4444 0%, #22c55e 50%, #ef4444 100%)'}}>
+                <div
+                  className="absolute top-0 bottom-0 w-1 transition-all duration-75"
+                  style={{
+                    left: `${50 + (centsClamped / 50) * 50}%`,
+                    background:'#fff',
+                    boxShadow:'0 0 8px rgba(255,255,255,0.8)'
+                  }}
+                />
+                <div className="absolute inset-0 flex items-center justify-between px-2 text-xs font-mono font-bold" style={{color:'#000'}}>
+                  <span>-50¢</span>
+                  <span>0¢</span>
+                  <span>+50¢</span>
+                </div>
+              </div>
             </div>
             <div className="text-xs text-gray-500 text-center">Dica: use fones e um local silencioso para melhor leitura.</div>
           </div>
