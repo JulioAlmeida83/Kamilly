@@ -30,7 +30,10 @@ type InstrumentName =
   | "electric_guitar_muted"
   | "overdriven_guitar"
   | "distortion_guitar"
-  | "acoustic_grand_piano";
+  | "acoustic_grand_piano"
+  | "guitar_harmonics"
+  | "guitar_fret_noise"
+  | "steel_drums";
 
 /** ===== Afinação padrão EADGBE em MIDI (6ª->1ª) ===== */
 const TUNING_MIDI = [40, 45, 50, 55, 59, 64] as const; // E2 A2 D3 G3 B3 E4
@@ -426,16 +429,6 @@ const CHORDS: Record<string, ChordEntry> = {
 const CHORD_KEYS = Object.keys(CHORDS);
 
 /** ===== Instrumentos ===== */
-const INSTRUMENTS: InstrumentName[] = [
-  "acoustic_guitar_nylon",
-  "acoustic_guitar_steel",
-  "electric_guitar_clean",
-  "electric_guitar_jazz",
-  "acoustic_grand_piano",
-  "overdriven_guitar",
-  "distortion_guitar",
-  "electric_guitar_muted",
-];
 
 /** ===== Drum Sampler (Synthetic) ===== */
 function useDrumSampler() {
@@ -1378,7 +1371,27 @@ export default function App() {
               🎸 Instrumento
             </label>
             <select className="w-full rounded-xl border-2 p-3 font-medium" style={{borderColor:'#e2e8f0'}} value={instrument} onChange={(e)=>setInstrument(e.target.value as InstrumentName)}>
-              {INSTRUMENTS.map(n=> <option key={n} value={n}>{n.replaceAll('_',' ')}</option>)}
+              <optgroup label="🎸 Guitarras Acústicas">
+                <option value="acoustic_guitar_nylon">Violão Nylon</option>
+                <option value="acoustic_guitar_steel">Violão Aço</option>
+              </optgroup>
+              <optgroup label="⚡ Guitarras Elétricas Clean">
+                <option value="electric_guitar_clean">Fender Stratocaster (Clean)</option>
+                <option value="electric_guitar_jazz">Gibson ES-335 (Jazz)</option>
+                <option value="electric_guitar_muted">Gretsch (Muted)</option>
+              </optgroup>
+              <optgroup label="🔥 Guitarras com Distorção">
+                <option value="overdriven_guitar">Gibson Les Paul (Overdrive)</option>
+                <option value="distortion_guitar">Fender Telecaster (Distortion)</option>
+              </optgroup>
+              <optgroup label="🎵 Efeitos Especiais">
+                <option value="guitar_harmonics">Harmônicos</option>
+                <option value="guitar_fret_noise">Fret Noise</option>
+                <option value="steel_drums">Steel Drums</option>
+              </optgroup>
+              <optgroup label="🎹 Piano">
+                <option value="acoustic_grand_piano">Piano Acústico</option>
+              </optgroup>
             </select>
           </div>
           <div className="p-5 rounded-2xl" style={{background:'#ffffffd9', boxShadow:'0 2px 10px rgba(0,0,0,.06)'}}>
