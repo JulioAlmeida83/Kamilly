@@ -1420,7 +1420,7 @@ export default function App() {
             <input
               type="range"
               min="0"
-              max="2"
+              max="4"
               step="0.1"
               value={instrumentVolume}
               onChange={e=>setInstrumentVolume(parseFloat(e.target.value))}
