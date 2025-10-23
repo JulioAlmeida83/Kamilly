@@ -646,6 +646,7 @@ function Fretboard({ shape, fingers, barre }: { shape: Shape; fingers?: Fingerin
         </filter>
       </defs>
       <rect x={0} y={0} width={width} height={height} rx={6} fill="#fff" filter="url(#cardShadow)" />
+      <rect x={1} y={1} width={width-2} height={height-2} rx={5} fill="none" stroke="#d4d4d4" strokeWidth="1.5" />
       <g transform={`translate(${margin},${margin})`}>
         {Array.from({ length: fretsCount + 1 }).map((_, i) => {
           const y = i * fretH; const fretNumber = startFret + i - 1;
@@ -1365,9 +1366,9 @@ export default function App() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-4 grid gap-6">
+      <div className="max-w-7xl mx-auto px-6 py-6 grid gap-6">
         {/* Mixer - Fonte & Padrões */}
-        <section className="p-6 rounded-lg" style={{background:'linear-gradient(180deg, #2d2d2d 0%, #242424 100%)', boxShadow:'inset 0 2px 1px rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.6)', border: '2px solid #1a1a1a'}}>
+        <section className="p-6 rounded-xl" style={{background:'linear-gradient(180deg, #2d2d2d 0%, #242424 100%)', boxShadow:'inset 0 2px 1px rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.6)', border: '2px solid #1a1a1a'}}>
           <div className="mb-2 pb-1" style={{borderBottom: '1px solid #333'}}>
             <h3 className="text-[9px] font-bold tracking-wider" style={{color:'#888', textTransform:'uppercase', letterSpacing:'1.5px'}}>SOURCE & PATTERNS</h3>
           </div>
@@ -1446,7 +1447,7 @@ export default function App() {
         </section>
 
         {/* Mixer - Faders */}
-        <section className="p-6 rounded-lg" style={{background:'linear-gradient(180deg, #2d2d2d 0%, #242424 100%)', boxShadow:'inset 0 2px 1px rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.6)', border: '2px solid #1a1a1a'}}>
+        <section className="p-6 rounded-xl" style={{background:'linear-gradient(180deg, #2d2d2d 0%, #242424 100%)', boxShadow:'inset 0 2px 1px rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.6)', border: '2px solid #1a1a1a'}}>
           <div className="mb-4 pb-3" style={{borderBottom: '1px solid #333'}}>
             <h3 className="text-xs font-bold tracking-wider" style={{color:'#888', textTransform:'uppercase', letterSpacing:'2px'}}>FADERS & CONTROLS</h3>
           </div>
@@ -1532,7 +1533,7 @@ export default function App() {
         </section>
 
         {/* Mixer - FX */}
-        <section className="p-6 rounded-lg" style={{background:'linear-gradient(180deg, #2d2d2d 0%, #242424 100%)', boxShadow:'inset 0 2px 1px rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.6)', border: '2px solid #1a1a1a'}}>
+        <section className="p-6 rounded-xl" style={{background:'linear-gradient(180deg, #2d2d2d 0%, #242424 100%)', boxShadow:'inset 0 2px 1px rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.6)', border: '2px solid #1a1a1a'}}>
           <div className="mb-4 pb-3" style={{borderBottom: '1px solid #333'}}>
             <h3 className="text-xs font-bold tracking-wider" style={{color:'#888', textTransform:'uppercase', letterSpacing:'2px'}}>EFFECTS</h3>
           </div>
