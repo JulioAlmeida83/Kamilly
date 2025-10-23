@@ -970,6 +970,23 @@ export default function App() {
             </div>
           </div>
 
+          {/* Fretboard da sequência */}
+          {isPlayingSequence && currentBar >= 0 && currentBar < sequence.length && (
+            <div className="p-4 rounded-xl" style={{background:'#e0e7ff', border:'2px solid #4f46e5'}}>
+              <div className="text-sm font-medium mb-2 text-center">
+                Acorde atual: {getChordDisplaySymbol(sequence[currentBar].key)} (Compasso {currentBar + 1})
+              </div>
+              <Fretboard
+                shape={CHORDS[sequence[currentBar].key].variants[Math.min(sequence[currentBar].varIdx, CHORDS[sequence[currentBar].key].variants.length-1)].shape}
+                fingers={CHORDS[sequence[currentBar].key].variants[Math.min(sequence[currentBar].varIdx, CHORDS[sequence[currentBar].key].variants.length-1)].fingers}
+                barre={CHORDS[sequence[currentBar].key].variants[Math.min(sequence[currentBar].varIdx, CHORDS[sequence[currentBar].key].variants.length-1)].barre}
+              />
+              <p style={{fontSize:11, textAlign:'center', marginTop:8, color:'#475569'}}>
+                {CHORDS[sequence[currentBar].key].name} · {CHORDS[sequence[currentBar].key].variants[sequence[currentBar].varIdx].label}
+              </p>
+            </div>
+          )}
+
           {/* faixa de roots sincronizada */}
           <div className="flex gap-2 flex-wrap items-center text-xs">
             {sequence.map((it, idx) => {
